@@ -1,4 +1,5 @@
 *** Settings ***
+Suite Setup       setup
 Library           RequestsLibrary
 Resource          公共资源.txt
 Library           MyMongodbLibrary
@@ -27,104 +28,179 @@ ${target_search_url}    /api/remarket/target?offset=0&limit=100
     should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
 
 查询营销对象_03_有权限用户查询
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${target_search_url}    headers=&{header}
+    log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
 
 分包营销对象_04_临时对象指定分包
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${target_info}    查询营销对象    临时对象
-    ${partition_strategy}    分包策略    ${target_info['customer_count']}    3
+    ${partition_strategy}    分包策略    ${target_info['customer_count']}    2
     ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
     should be equal as strings    ${response.json()['data']}    ok
 
 分包营销对象_05_临时对象指定分包_分包数之和大于对象量
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${target_info}    查询营销对象    临时对象
-    ${partition_strategy}    分包策略    ${target_info['customer_count']+1}    3
+    ${partition_strategy}    分包策略    ${target_info['customer_count']+1}    2
     ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
     should be equal as integers    ${response.json()['code']}    ${13}
 
 分包营销对象_06_临时对象指定分包_分包数之和小于对象量
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${target_info}    查询营销对象    临时对象
-    ${partition_strategy}    分包策略    ${target_info['customer_count']-1}    3
+    ${partition_strategy}    分包策略    ${target_info['customer_count']-1}    2
     ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
     should be equal as integers    ${response.json()['code']}    ${13}
 
 分包营销对象_07_定时对象比例分包
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${target_info}    查询营销对象    定时对象
-    ${partition_strategy}    分包策略    100    3
-    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
+    ${partition_strategy}    分包策略    100    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=3
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
-    should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
-    should be equal as integers    ${response.json()['code']}    ${13}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 分包营销对象_08_定时对象比例分包_分包之和小于100
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
-    ${target_info}    查询营销对象    临时对象
-    ${partition_strategy}    分包策略    99    3
-    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    定时对象
+    ${partition_strategy}    分包策略    99    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=3
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
-    should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
-    should be equal as integers    ${response.json()['code']}    ${13}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    partition比例分包综合需为100。
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 分包营销对象_09_定时对象比例分包_分包之和大于100
-    &{header}    create dictionary    Content-Type=application/json
-    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
-    ${target_info}    查询营销对象    临时对象
-    ${partition_strategy}    分包策略    101    3
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    定时对象
+    ${partition_strategy}    分包策略    101    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=3
+    #拼接分包url
+    ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    partition比例分包综合需为100。
+    should be equal as integers    ${response.json()['code']}    ${101}
+
+分包营销对象_10_临时对象指定分包_已分包对象重分包
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    已分包临时对象
+    ${partition_strategy}    分包策略    ${target_info['customer_count']}    2
     ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
-    should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    此数据已分包
     should be equal as integers    ${response.json()['code']}    ${13}
 
-*** Keywords ***
-查询营销对象
-    [Arguments]    ${target_type}    # 定时对象|临时对象
-    [Documentation]    ${target_type} # 定时对象|临时对象
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
-    select collection    marketing_target
-    ${frequency}    create dictionary    $ne=once
-    ${filter}    run keyword if    '${target_type}'=='临时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=once
-    ...    ELSE IF    '${target_type}'=='定时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=${frequency}
-    ${results}    find    ${filter}    one_or_multi=one
-    ${target_id}    set variable    ${results[0]['_id']}
-    ${target_query_id}    set variable    ${results[0]['customer_query']}
-    #获取对象量
-    select collection    marketing_customer_query
-    ${objectid}    Objectid    ${target_query_id}
-    ${filter}    create dictionary    _id=${objectid}
-    ${query_results}    find    ${filter}    one_or_multi=one
-    ${target_customer_count}    set variable    ${query_results[0]['customer_count']}
-    ${target_info}    create dictionary    id=${target_id}    customer_count=${target_customer_count}
-    [Return]    ${target_info}    # 返回营销对象id和customer_count
+分包营销对象_11_临时对象指定分包_已配置对象重分包
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    已配置临时对象
+    ${partition_strategy}    分包策略    ${target_info['customer_count']}    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=2
+    #拼接分包url
+    ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许重新分包。
+    should be equal as integers    ${response.json()['code']}    ${101}
 
+分包营销对象_12_定时对象比例分包_已分包对象重分包
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    已分包定时对象
+    ${partition_strategy}    分包策略    100    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=3
+    #拼接分包url
+    ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    此数据已分包
+    should be equal as integers    ${response.json()['code']}    ${13}
+
+分包营销对象_13_定时对象比例分包_已配置对象重分包
+    #&{header}    create dictionary    Content-Type=application/json
+    #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${target_info}    查询营销对象    已配置定时对象
+    ${partition_strategy}    分包策略    100    2
+    ${pack_strategy}    create dictionary    partition=${partition_strategy}    type=3
+    #拼接分包url
+    ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许重新分包。
+    should be equal as integers    ${response.json()['code']}    ${101}
+
+取消分包营销对象_14_取消已分包临时对象
+    ${target_info}    查询营销对象    已分包临时对象
+    #拼接取消分包url
+    ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+取消分包营销对象_15_取消已分包定时对象
+    ${target_info}    查询营销对象    已分包定时对象
+    #拼接取消分包url
+    ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+取消分包营销对象_16_取消未分包临时对象
+    ${target_info}    查询营销对象    临时对象
+    #拼接取消分包url
+    ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    对象未分包
+    should be equal as integers    ${response.json()['code']}    ${15}
+
+取消分包营销对象_17_取消未分包定时对象
+    ${target_info}    查询营销对象    定时对象
+    #拼接取消分包url
+    ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    对象未分包
+    should be equal as integers    ${response.json()['code']}    ${15}
+
+*** Keywords ***
 分包策略
     [Arguments]    ${customer_count}    ${package_number}    # 对象量|分包数
     ${customer_count}    convert to integer    ${customer_count}
@@ -143,3 +219,33 @@ ${target_search_url}    /api/remarket/target?offset=0&limit=100
     \    ${package_str}    catenate    SEPARATOR=,    ${package_str}    ${item}
     ${package_str}    strip string    ${package_str}    characters=,
     [Return]    ${package_str}    # 返回分包策略字符串
+
+查询营销对象
+    [Arguments]    ${target_type}    # 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象
+    [Documentation]    ${target_type} # 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_target
+    ${frequency}    create dictionary    $ne=once
+    ${ref_count}    create dictionary    $gt=${0}
+    ${filter}    run keyword if    '${target_type}'=='临时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=once
+    ...    ELSE IF    '${target_type}'=='定时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=${frequency}
+    ...    ELSE IF    '${target_type}'=='已分包临时对象'    create dictionary    status=${1}    ref_count=${0}    frequency=once
+    ...    ELSE IF    '${target_type}'=='已分包定时对象'    create dictionary    status=${1}    ref_count=${0}    frequency=${frequency}
+    ...    ELSE IF    '${target_type}'=='已配置临时对象'    create dictionary    ref_count=${ref_count}    frequency=once
+    ...    ELSE IF    '${target_type}'=='已配置定时对象'    create dictionary    ref_count=${ref_count}    frequency=${frequency}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${target_id}    set variable    ${results[0]['_id']}
+    ${target_query_id}    set variable    ${results[0]['customer_query']}
+    #获取对象量
+    select collection    marketing_customer_query
+    ${objectid}    Objectid    ${target_query_id}
+    ${filter}    create dictionary    _id=${objectid}
+    ${query_results}    find    ${filter}    one_or_multi=one
+    ${target_customer_count}    set variable    ${query_results[0]['customer_count']}
+    ${target_info}    create dictionary    id=${target_id}    customer_count=${target_customer_count}
+    [Return]    ${target_info}    # 返回营销对象id和customer_count
+
+setup
+    &{header}    create dictionary    Content-Type=application/json
+    set suite variable    &{header}    &{header}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
