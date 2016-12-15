@@ -1,0 +1,26 @@
+*** Settings ***
+Library           RequestsLibrary
+
+*** Variables ***
+${base_url}       http://10.2.124.15:10000
+${timeout}        10
+&{user_info}      username=develop    password=gfadmin
+${login_interface}    /keystone/api/session/signin    # 营销平台登录验证接口
+&{mongodb_info}    host=10.2.124.15    port=27017    database=gfactivity
+
+*** Keywords ***
+create_global_session
+    [Arguments]    ${alias}
+    [Documentation]    获取全局session
+    ${session}    create session    ${alias}    ${base_url}    timeout=${timeout}
+    [Return]    ${session}
+
+登录
+    [Arguments]    ${login_url}    ${username}    ${password}    # 登录验证接口|用户名|密码
+    ${session}    create_global_session    global_session
+    &{header}    create dictionary    Content-Type=application/json
+    &{user_info}    create dictionary    username=${username}    password=${password}
+    ${response}    post request    global_session    ${login_url}    data=&{user_info}    headers=&{header}
+    log    ${response.text}
+    should be true    ${response.json()['success']}
+    [Return]    ${session}

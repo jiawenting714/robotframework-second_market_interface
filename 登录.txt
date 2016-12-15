@@ -1,0 +1,11 @@
+*** Settings ***
+Library           RequestsLibrary
+Resource          公共资源.txt
+
+*** Variables ***
+${login_interface}    /keystone/api/session/signin    # 营销平台登录验证接口
+
+*** Test Cases ***
+登录_01_suceess
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    log    ${session.cookies}
