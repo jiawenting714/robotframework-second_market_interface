@@ -1,0 +1,5 @@
+*** Test Cases ***
+test
+    ${create}    create dictionary    $ne=ss
+    log     ${create}
+    log    ${10%3}
