@@ -3,10 +3,10 @@ Library           RequestsLibrary
 
 *** Variables ***
 ${base_url}       http://10.2.124.15:10000
-${timeout}        10
-&{user_info}      username=develop    password=gfadmin
+${timeout}        10    # 连接超时时间
+&{user_info}      username=develop    password=gfadmin    # 有二次营销权限的用户信息
 ${login_interface}    /keystone/api/session/signin    # 营销平台登录验证接口
-&{mongodb_info}    host=10.2.124.15    port=27017    database=gfactivity
+&{mongodb_info}    host=10.2.124.15    port=27017    database=gfactivity    # 测试环境mongodb信息
 
 *** Keywords ***
 create_global_session

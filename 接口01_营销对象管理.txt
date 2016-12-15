@@ -200,6 +200,33 @@ ${target_search_url}    /api/remarket/target?offset=0&limit=100
     should be equal as strings    ${response.json()['msg']}    对象未分包
     should be equal as integers    ${response.json()['code']}    ${15}
 
+删除营销对象_18_删除未分包对象
+    ${target_info}    查询营销对象    临时对象
+    #拼接删除营销对象url
+    ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+删除营销对象_19_删除已分包对象
+    ${target_info}    查询营销对象    已分包临时对象
+    #拼接删除营销对象url
+    ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+删除营销对象_20_删除已配置对象
+    ${target_info}    查询营销对象    已配置临时对象
+    #拼接删除营销对象url
+    ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
+    ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
+    should be equal as integers    ${response.json()['code']}    ${101}
+
 *** Keywords ***
 分包策略
     [Arguments]    ${customer_count}    ${package_number}    # 对象量|分包数
