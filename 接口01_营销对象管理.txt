@@ -20,7 +20,7 @@ ${target_search_url}    /api/remarket/target?offset=0&limit=100
     should be equal as strings    ${response.json()['msg']}    您没有权限访问
 
 查询营销对象_02_用户未登录查询
-    create_global_session    global_session
+    create_global_session    global_session    ${base_url}
     &{header}    create dictionary    Content-Type=application/json
     ${response}    get request    global_session    ${target_search_url}    headers=&{header}
     log    ${response.text}

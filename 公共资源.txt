@@ -1,5 +1,6 @@
 *** Settings ***
 Library           RequestsLibrary
+Library           String
 
 *** Variables ***
 ${base_url}       http://10.2.124.15:10000
@@ -10,17 +11,23 @@ ${login_interface}    /keystone/api/session/signin    # 营销平台登录验证
 
 *** Keywords ***
 create_global_session
-    [Arguments]    ${alias}
+    [Arguments]    ${alias}    ${base_url}
     [Documentation]    获取全局session
     ${session}    create session    ${alias}    ${base_url}    timeout=${timeout}
     [Return]    ${session}
 
 登录
     [Arguments]    ${login_url}    ${username}    ${password}    # 登录验证接口|用户名|密码
-    ${session}    create_global_session    global_session
+    ${session}    create_global_session    global_session    ${base_url}
     &{header}    create dictionary    Content-Type=application/json
     &{user_info}    create dictionary    username=${username}    password=${password}
     ${response}    post request    global_session    ${login_url}    data=&{user_info}    headers=&{header}
     log    ${response.text}
     should be true    ${response.json()['success']}
     [Return]    ${session}
+
+生产随机字符串
+    [Arguments]    ${prefix}=None
+    ${random_string}    generate random string    4    [NUMBERS]
+    ${totle_random_string}    catenate    SEPARATOR=_    ${prefix}    ${random_string}
+    [Return]    ${totle_random_string}    # 返回随机字符串

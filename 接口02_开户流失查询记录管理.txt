@@ -1,0 +1,207 @@
+*** Settings ***
+Suite Setup       setup
+Library           RequestsLibrary
+Resource          公共资源.txt
+Library           MyMongodbLibrary
+Library           Collections
+Library           String
+
+*** Variables ***
+${openloss_search_url}    /api/remarket/customer_query?filter_name=open-account-loss&limit=10    # 开户流失查询记录管理：查询接口
+${create_target_url}    /api/remarket/target    # 创建营销对象接口
+
+*** Test Cases ***
+查询开户流失记录_01_无权限用户登录查询
+    ${user_info}    create dictionary    username=super    password=gfadmin
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${18}
+    should be equal as strings    ${response.json()['msg']}    您没有权限访问
+
+查询开户流失记录_02_用户未登录查询
+    create global session    global_session    ${base_url}
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${17}
+    should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
+
+查询开户流失记录_03_有权限用户登录查询
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+创建营销对象_04_临时对象
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    name=${target_name}    frequency=once    queryId=${query_id}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+创建营销对象_05_临时对象_无营销对象名称
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    frequency=once    queryId=${query_id}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is required]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_06_临时对象_营销对象名称为空
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    name=${EMPTY}    frequency=once    queryId=${query_id}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is required]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_06_定时对象_frequency为空
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    frequency=${EMPTY}    name=${target_name}    queryId=${query_id}    period_time=09:00
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "frequency" fails because ["frequency" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_07_定时对象_每日_无营销对象名称
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    frequency=${EMPTY}    name=${EMPTY}    queryId=${query_id}    period_time=09:00
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_08_定时对象_每日
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    ${json_data}    create dictionary    name=${target_name}    frequency=daily    queryId=${query_id}    period_time=09:00
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+创建营销对象_09_定时对象_每周
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #每周二
+    ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+创建营销对象_10_定时对象_每周_period_date大于6
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #
+    ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=8
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #异常检查
+    should be equal as strings    ${response.json()['msg']}    period_date must less than 7
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_11_定时对象_每周_无营销对象名称
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #每周二
+    ${json_data}    create dictionary    name=${EMPTY}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_12_定时对象_每月_无营销对象名称
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #每月2号
+    ${json_data}    create dictionary    name=${EMPTY}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=2
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_13_定时对象_每月_period_date大于28
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #每月33号
+    ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=33
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    period_date must less than 28
+    should be equal as integers    ${response.json()['code']}    ${12}
+
+创建营销对象_14_定时对象_每月
+    ${customer_info}    查询开户流失记录
+    #拼接json_data条件
+    ${target_name}    生产随机字符串    target_name
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    #每月9号
+    ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=9
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+删除开户流失记录_15_删除记录
+    ${customer_info}    查询开户流失记录
+    #拼接删除记录url
+    ${openloss_delete_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/customer_query/    ${customer_info['customer_query_id']}
+    ${response}    delete request    global_session    ${openloss_delete_url}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+*** Keywords ***
+查询开户流失记录
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_customer_query
+    ${status}    create dictionary    $ne=9
+    ${filter}    create dictionary    status=${status}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    [Return]    ${customer_query_info}    # 返回查询后的customer_query_info
+
+setup
+    &{header}    create dictionary    Content-Type=application/json
+    set suite variable    &{header}    &{header}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}

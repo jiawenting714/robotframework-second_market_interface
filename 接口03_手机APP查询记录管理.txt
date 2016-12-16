@@ -1,0 +1,4 @@
+*** Variables ***
+${app_search_url}    /api/remarket/customer_query?filter_name=app-customer&limit=10    # 手机app查询记录管理：查询接口
+
+*** Test Cases ***
