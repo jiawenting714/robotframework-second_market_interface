@@ -195,7 +195,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 查询开户流失记录
     connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
     select collection    marketing_customer_query
-    ${status}    create dictionary    $ne=9
+    ${status}    create dictionary    $ne=9    filter_name=open-account-loss
     ${filter}    create dictionary    status=${status}
     ${results}    find    ${filter}    one_or_multi=one
     ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
