@@ -60,7 +60,8 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
-    ${json_data}    create dictionary    frequency=${EMPTY}    name=${target_name}    queryId=${query_id}    period_time=09:00
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
+    ${json_data}    create dictionary    frequency=${EMPTY}    name=${target_name}    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "frequency" fails because ["frequency" is not allowed to be empty]
@@ -71,8 +72,9 @@ ${create_target_url}    /api/remarket/target
     #拼接json_data条件
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     ${query_id}    convert to string    ${query_id}
-    ${json_data}    create dictionary    name=${target_name}    frequency=daily    queryId=${query_id}    period_time=09:00
+    ${json_data}    create dictionary    name=${target_name}    frequency=daily    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
@@ -84,7 +86,8 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
-    ${json_data}    create dictionary    frequency=${EMPTY}    name=${EMPTY}    queryId=${query_id}    period_time=09:00
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
+    ${json_data}    create dictionary    frequency=${EMPTY}    name=${EMPTY}    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
@@ -96,8 +99,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #每周二
     ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
@@ -109,8 +114,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #
     ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=8
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     #异常检查
@@ -123,8 +130,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #每周二
     ${json_data}    create dictionary    name=${EMPTY}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
@@ -136,8 +145,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #每月9号
     ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=9
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
@@ -149,8 +160,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #每月33号
     ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=33
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    period_date must less than 28
@@ -162,8 +175,10 @@ ${create_target_url}    /api/remarket/target
     ${target_name}    生产随机字符串    app_target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     #每月2号
     ${json_data}    create dictionary    name=${EMPTY}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=2
+    ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]

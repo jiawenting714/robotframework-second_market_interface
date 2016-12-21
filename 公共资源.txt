@@ -1,6 +1,7 @@
 *** Settings ***
 Library           RequestsLibrary
 Library           String
+Library           DateTime
 
 *** Variables ***
 ${base_url}       http://10.2.124.15:10000
@@ -31,3 +32,9 @@ create_global_session
     ${random_string}    generate random string    4    [NUMBERS]
     ${totle_random_string}    catenate    SEPARATOR=_    ${prefix}    ${random_string}
     [Return]    ${totle_random_string}    # 返回随机字符串
+
+获取指定日期
+    [Arguments]    ${increment}=0    ${date_formate}=%Y-%m-%d %H:%M:%S    ${exclude_millis}=False    # 增加时间|日期显示格式|是否包括毫秒部分
+    [Documentation]    ${increment}=0 | ${date_formate}=%Y-%m-%d %H:%M:%S | ${exclude_millis}=False \ # 增加时间|日期显示格式|是否包括毫秒部分
+    ${date}    get current date    increment=${increment}    result_format=${date_formate}    exclude_millis=${exclude_millis}
+    [Return]    ${date}

@@ -1,0 +1,70 @@
+*** Settings ***
+Library           RequestsLibrary
+Library           String
+Resource          公共资源.txt
+Library           MyMongodbLibrary
+
+*** Variables ***
+${content_search_url}    /api/remarket/marketing_content/query?limit=100
+${create_content_url}    /api/remarket/marketing_content/save
+
+*** Test Cases ***
+查询营销内容_01_无权限用户登录查询
+    ${user_info}    create dictionary    username=super    password=gfadmin
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${18}
+    should be equal as strings    ${response.json()['msg']}    您没有权限访问
+
+查询营销内容_02_用户未登录查询
+    create global session    global_session    ${base_url}
+    ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${17}
+    should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
+
+查询营销内容_03_有权限用户登录查询
+    ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+创建营销内容_04_短信
+
+创建营销内容_05_短信_营销内容名称为空
+
+创建营销内容_06_短信_短信发送为空
+
+创建营销内容_07_app
+
+创建营销内容_08_app_营销内容名称为空
+
+创建营销内容_09_app_营销内容标题为空
+
+创建营销内容_10_app_URL为空
+
+创建营销内容_11_app_推送内容为空
+
+编辑营销内容_12_短信_编辑
+
+编辑营销内容_13_短信_编辑已配置短信
+
+复制营销内容_14_短信_复制
+
+复制营销内容_15_短信_复制已配置短信
+
+删除营销内容_16_短信_删除
+
+删除营销内容_17_短信_删除已配置短信
+
+编辑营销内容_18_app_编辑
+
+编辑营销内容_19_app_编辑已配置app
+
+复制营销内容_20_app_复制
+
+复制营销内容_21_app_复制已配置app
+
+删除营销内容_22_app_删除
+
+删除营销内容_23_app_删除已配置app
