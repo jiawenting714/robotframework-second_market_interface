@@ -35,7 +35,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_04_临时对象
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${json_data}    create dictionary    name=${target_name}    frequency=once    queryId=${query_id}
@@ -47,7 +47,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_05_临时对象_无营销对象名称
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${json_data}    create dictionary    frequency=once    queryId=${query_id}
@@ -59,7 +59,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_06_临时对象_营销对象名称为空
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${json_data}    create dictionary    name=${EMPTY}    frequency=once    queryId=${query_id}
@@ -71,7 +71,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_06_定时对象_frequency为空
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -84,7 +84,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_07_定时对象_每日_无营销对象名称
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -97,7 +97,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_08_定时对象_每日
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -110,7 +110,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_09_定时对象_每周
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -125,7 +125,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_10_定时对象_每周_period_date大于6
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -141,7 +141,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_11_定时对象_每周_无营销对象名称
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -156,7 +156,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_12_定时对象_每月_无营销对象名称
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -171,7 +171,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_13_定时对象_每月_period_date大于28
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
@@ -186,7 +186,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
 创建营销对象_14_定时对象_每月
     ${customer_info}    查询开户流失记录
     #拼接json_data条件
-    ${target_name}    生产随机字符串    target_name
+    ${target_name}    生成随机字符串    target_name
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S

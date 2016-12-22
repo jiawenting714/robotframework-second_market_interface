@@ -27,7 +27,7 @@ create_global_session
     should be true    ${response.json()['success']}
     [Return]    ${session}
 
-生产随机字符串
+生成随机字符串
     [Arguments]    ${prefix}=None
     ${random_string}    generate random string    4    [NUMBERS]
     ${totle_random_string}    catenate    SEPARATOR=_    ${prefix}    ${random_string}

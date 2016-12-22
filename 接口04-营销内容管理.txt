@@ -1,4 +1,5 @@
 *** Settings ***
+Suite Setup       setup
 Library           RequestsLibrary
 Library           String
 Resource          公共资源.txt
@@ -7,6 +8,7 @@ Library           MyMongodbLibrary
 *** Variables ***
 ${content_search_url}    /api/remarket/marketing_content/query?limit=100
 ${create_content_url}    /api/remarket/marketing_content/save
+${delete_content_url}    /api/remarket/marketing_content/delete
 
 *** Test Cases ***
 查询营销内容_01_无权限用户登录查询
@@ -30,41 +32,183 @@ ${create_content_url}    /api/remarket/marketing_content/save
     should be equal as integers    ${response.json()['code']}    ${0}
 
 创建营销内容_04_短信
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=短信测试内容    m_port=10690290
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 创建营销内容_05_短信_营销内容名称为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${EMPTY}    c_type=message    msg=短信测试内容    m_port=10690290
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "name" fails because ["name" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
-创建营销内容_06_短信_短信发送为空
+创建营销内容_06_短信_短信发送内容为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=${EMPTY}    m_port=10690290
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "msg" fails because ["msg" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 创建营销内容_07_app
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 创建营销内容_08_app_营销内容名称为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${EMPTY}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "name" fails because ["name" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 创建营销内容_09_app_营销内容标题为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=${EMPTY}    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "app_title" fails because ["app_title" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 创建营销内容_10_app_URL为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=${EMPTY}
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "app_url" fails because ["app_url" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 创建营销内容_11_app_推送内容为空
+    ${content_name}    生成随机字符串    fgk_message_name
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=${EMPTY}    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "msg" fails because ["msg" is not allowed to be empty]
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 编辑营销内容_12_短信_编辑
+    ${content_info}    查询营销内容    短信
+    ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=测试短信内容    m_port=10690290    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 编辑营销内容_13_短信_编辑已配置短信
+    ${content_info}    查询营销内容    已配置短信
+    ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=测试短信内容    m_port=10690290    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许修改。
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 复制营销内容_14_短信_复制
+    log    pass
 
 复制营销内容_15_短信_复制已配置短信
+    log    pass
 
 删除营销内容_16_短信_删除
+    ${content_info}    查询营销内容    短信
+    #构造json_data
+    ${json_data}    create dictionary    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 删除营销内容_17_短信_删除已配置短信
+    ${content_info}    查询营销内容    已配置短信
+    #构造json_data
+    ${json_data}    create dictionary    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 编辑营销内容_18_app_编辑
+    ${content_info}    查询营销内容    app
+    ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容     app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 编辑营销内容_19_app_编辑已配置app
+    ${content_info}    查询营销内容    已配置app
+    ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ...    id=${content_info['content_id']}
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许修改。
+    should be equal as integers    ${response.json()['code']}    ${101}
 
 复制营销内容_20_app_复制
+    log    pass
 
 复制营销内容_21_app_复制已配置app
+    log    pass
 
 删除营销内容_22_app_删除
+    ${content_info}    查询营销内容    app
+    #构造json_data
+    ${json_data}    create dictionary    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
 
 删除营销内容_23_app_删除已配置app
+    ${content_info}    查询营销内容    已配置app
+    #构造json_data
+    ${json_data}    create dictionary    id=${content_info["content_id"]}
+    ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
+    should be equal as integers    ${response.json()['code']}    ${101}
+
+*** Keywords ***
+setup
+    &{header}    create dictionary    Content-Type=application/json
+    set suite variable    &{header}    &{header}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+
+查询营销内容
+    [Arguments]    ${content_type}    # 短信|app|已配置短信|已配置app
+    [Documentation]    ${content_type} \ # 短信|app|已配置短信|已配置app
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_content
+    ${ref_count}    create dictionary    $gt=${0}
+    #构造filter
+    ${filter}    run keyword if    '${content_type}'=='短信'    create dictionary    c_type=message    ref_count=${0}
+    ...    ELSE IF    '${content_type}'=='app'    create dictionary    c_type=app    ref_count=${0}
+    ...    ELSE IF    '${content_type}'=='已配置短信'    create dictionary    c_type=message    ref_count=${ref_count}
+    ...    ELSE IF    '${content_type}'=='已配置app'    create dictionary    c_type=app    ref_count=${ref_count}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${content_info}    create dictionary    content_id=${results[0]["_id"]}\    content_name=${results[0]["name"]}\
+    [Return]    ${content_info}    # 营销内容id和营销内容名称
