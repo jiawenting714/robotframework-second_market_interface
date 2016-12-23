@@ -151,7 +151,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     ${content_info}    查询营销内容    app
     ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
     #构造json_data
-    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容     app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.

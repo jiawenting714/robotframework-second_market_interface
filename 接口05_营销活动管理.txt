@@ -1,0 +1,148 @@
+*** Settings ***
+Suite Setup       setup
+Library           RequestsLibrary
+Library           String
+Library           MyMongodbLibrary
+Resource          公共资源.txt
+
+*** Variables ***
+${search_activity_url}    /api/remarket/activity/query?offset=0&limit=100
+${delete_activity_url}    /api/remarket/activity/delete
+${start_activity_url}    /api/remarket/activity/start
+
+*** Test Cases ***
+查询营销活动_01_有权限用户登录查询
+    ${response}    get request    global_session    ${search_activity_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+启动营销活动_02_启动待审核活动
+    ${activity_info}    查询活动信息    待审核
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+启动营销活动_03_启动审核中活动
+    ${activity_info}    查询活动信息    审核中
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+启动营销活动_04_启动活动中活动
+    ${activity_info}    查询活动信息    活动中
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+启动营销活动_05_启动审核不通过活动
+    ${activity_info}    查询活动信息    审核不通过
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+启动营销活动_06_启动活动失败活动
+    ${activity_info}    查询活动信息    活动失败
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+启动营销活动_07_启动审核完成活动
+    ${activity_info}    查询活动信息    审核通过
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${0}
+    should be equal as strings    ${response['data']}    xxx
+
+删除营销活动_08_删除待审核活动
+    ${activity_info}    查询活动信息    待审核
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+删除营销活动_09_删除审核中活动
+    ${activity_info}    查询活动信息    审核中
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+删除营销活动_10_删除活动中活动
+    ${activity_info}    查询活动信息    活动中
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+删除营销活动_11_删除审核不通过活动
+    ${activity_info}    查询活动信息    审核不通过
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+删除营销活动_12_删除活动失败活动
+    ${activity_info}    查询活动信息    活动失败
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+删除营销活动_13_删除审核完成活动
+    ${activity_info}    查询活动信息    审核通过
+    ${params}    create dictionary    id=${activity_info['id']}
+    ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    #检查点
+    should be equal as numbers    ${response['code']}    ${101}
+    should be equal as strings    ${response['msg']}    xxx
+
+提交审核营销活动_14_提交待审核活动
+
+提交审核营销活动_15_提交审核中活动
+
+提交审核营销活动_16_提交活动中活动
+
+提交审核营销活动_17_提交审核不通过活动
+
+提交审核营销活动_18_提交活动失败活动
+
+提交审核营销活动_18_提交审核完成活动
+
+*** Keywords ***
+setup
+    &{header}    create dictionary    Content-Type=application/json
+    set suite variable    &{header}    &{header}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+
+查询活动信息
+    [Arguments]    ${activity_type}    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    [Documentation]    ${activity_type} # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_activity
+    #构造filter
+    ${filter}    run keyword if    '${activity_type}'=='待审核'    create dictionary    status=${1}
+    ...    ELSE IF    '${activity_type}'=='审核中'    create dictionary    status=${6}
+    ...    ELSE IF    '${activity_type}'=='审核不通过'    create dictionary    status=${8}
+    ...    ELSE IF    '${activity_type}'=='审核通过'    create dictionary    status=${7}
+    ...    ELSE IF    '${activity_type}'=='活动中'    create dictionary    status=${2}
+    ...    ELSE IF    '${activity_type}'=='活动失败'    create dictionary    status=${4}
+    ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
+    [Return]    ${activity_info}    # 活动id和name
