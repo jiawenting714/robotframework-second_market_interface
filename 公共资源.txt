@@ -2,11 +2,12 @@
 Library           RequestsLibrary
 Library           String
 Library           DateTime
+Library           MyMongodbLibrary
 
 *** Variables ***
 ${base_url}       http://10.2.124.15:10000
 ${timeout}        10    # 连接超时时间
-&{user_info}      username=develop    password=gfadmin    # 有二次营销权限的用户信息
+&{user_info}      username=admin    password=gfadmin    # 有二次营销权限的用户信息
 ${login_interface}    /keystone/api/session/signin    # 营销平台登录验证接口
 &{mongodb_info}    host=10.2.124.15    port=27017    database=gfactivity    # 测试环境mongodb信息
 
@@ -38,3 +39,78 @@ create_global_session
     [Documentation]    ${increment}=0 | ${date_formate}=%Y-%m-%d %H:%M:%S | ${exclude_millis}=False \ # 增加时间|日期显示格式|是否包括毫秒部分
     ${date}    get current date    increment=${increment}    result_format=${date_formate}    exclude_millis=${exclude_millis}
     [Return]    ${date}
+
+查询开户流失记录
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_customer_query
+    ${status}    create dictionary    $ne=9
+    ${filter}    create dictionary    status=${status}    filter_name=open-account-loss
+    ${results}    find    ${filter}    one_or_multi=one
+    ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    [Return]    ${customer_query_info}    # 返回查询后的customer_query_info
+
+查询营销对象
+    [Arguments]    ${target_type}    # 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象
+    [Documentation]    ${target_type} # 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_target
+    ${frequency}    create dictionary    $ne=once
+    ${ref_count}    create dictionary    $gt=${0}
+    ${filter}    run keyword if    '${target_type}'=='临时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=once
+    ...    ELSE IF    '${target_type}'=='定时对象'    create dictionary    status=${0}    ref_count=${0}    frequency=${frequency}
+    ...    ELSE IF    '${target_type}'=='已分包临时对象'    create dictionary    status=${1}    ref_count=${0}    frequency=once
+    ...    ELSE IF    '${target_type}'=='已分包定时对象'    create dictionary    status=${1}    ref_count=${0}    frequency=${frequency}
+    ...    ELSE IF    '${target_type}'=='已配置临时对象'    create dictionary    ref_count=${ref_count}    frequency=once
+    ...    ELSE IF    '${target_type}'=='已配置定时对象'    create dictionary    ref_count=${ref_count}    frequency=${frequency}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${target_id}    set variable    ${results[0]['_id']}
+    ${target_query_id}    set variable    ${results[0]['customer_query']}
+    #获取对象量
+    select collection    marketing_customer_query
+    ${objectid}    Objectid    ${target_query_id}
+    ${filter}    create dictionary    _id=${objectid}
+    ${query_results}    find    ${filter}    one_or_multi=one
+    ${target_customer_count}    set variable    ${query_results[0]['customer_count']}
+    ${target_info}    create dictionary    id=${target_id}    customer_count=${target_customer_count}
+    [Return]    ${target_info}    # 返回营销对象id和customer_count
+
+查询手机app记录
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_customer_query
+    ${status}    create dictionary    $ne=9
+    ${filter}    create dictionary    status=${status}    filter_name=app-customer
+    ${results}    find    ${filter}    one_or_multi=one
+    ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    [Return]    ${customer_query_info}
+
+查询营销内容
+    [Arguments]    ${content_type}    # 短信|app|已配置短信|已配置app
+    [Documentation]    ${content_type} \ # 短信|app|已配置短信|已配置app
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_content
+    ${ref_count}    create dictionary    $gt=${0}
+    #构造filter
+    ${filter}    run keyword if    '${content_type}'=='短信'    create dictionary    c_type=message    ref_count=${0}
+    ...    ELSE IF    '${content_type}'=='app'    create dictionary    c_type=app    ref_count=${0}
+    ...    ELSE IF    '${content_type}'=='已配置短信'    create dictionary    c_type=message    ref_count=${ref_count}
+    ...    ELSE IF    '${content_type}'=='已配置app'    create dictionary    c_type=app    ref_count=${ref_count}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${content_info}    create dictionary    content_id=${results[0]["_id"]}\    content_name=${results[0]["name"]}\
+    [Return]    ${content_info}    # 营销内容id和营销内容名称
+
+查询活动信息
+    [Arguments]    ${activity_type}    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    [Documentation]    ${activity_type} # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_activity
+    #构造filter
+    ${filter}    run keyword if    '${activity_type}'=='待审核'    create dictionary    status=${1}
+    ...    ELSE IF    '${activity_type}'=='审核中'    create dictionary    status=${6}
+    ...    ELSE IF    '${activity_type}'=='审核不通过'    create dictionary    status=${8}
+    ...    ELSE IF    '${activity_type}'=='审核通过'    create dictionary    status=${7}
+    ...    ELSE IF    '${activity_type}'=='活动中'    create dictionary    status=${2}
+    ...    ELSE IF    '${activity_type}'=='活动失败'    create dictionary    status=${4}
+    ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}
+    ${results}    find    ${filter}    one_or_multi=one
+    ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
+    [Return]    ${activity_info}    # 活动id和name
