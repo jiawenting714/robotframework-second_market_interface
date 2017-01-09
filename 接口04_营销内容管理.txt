@@ -4,6 +4,7 @@ Library           RequestsLibrary
 Library           String
 Resource          公共资源.txt
 Library           MyMongodbLibrary
+Library           Collections
 
 *** Variables ***
 ${content_search_url}    /api/remarket/marketing_content/query?limit=100
@@ -32,16 +33,17 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     should be equal as integers    ${response.json()['code']}    ${0}
 
 创建营销内容_04_短信
-    ${content_name}    生成随机字符串    fgk_message_name
+    ${content_name}    生成营销内容名称
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=短信测试内容    m_port=10690290
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销内容    ${test_content_name}
 
 创建营销内容_05_短信_营销内容名称为空
-    ${content_name}    生成随机字符串    fgk_message_name
+    ${content_name}    生成营销内容名称
     #构造json_data
     ${json_data}    create dictionary    name=${EMPTY}    c_type=message    msg=短信测试内容    m_port=10690290
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
@@ -60,12 +62,14 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
 
 创建营销内容_07_app
     ${content_name}    生成随机字符串    fgk_message_name
+    set test variable    ${test_content_name}    ${content_name}
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销内容    ${test_content_name}
 
 创建营销内容_08_app_营销内容名称为空
     ${content_name}    生成随机字符串    fgk_message_name
@@ -104,14 +108,17 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     should be equal as integers    ${response.json()['code']}    ${101}
 
 编辑营销内容_12_短信_编辑
-    ${content_info}    查询营销内容    短信
+    [Setup]    创建营销内容    短信
+    ${content_info}    查询营销内容    短信    ${test_content_name}
     ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    set test variable    ${test_content_name}    ${content_name}
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=测试短信内容    m_port=10690290    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销内容    ${test_content_name}
 
 编辑营销内容_13_短信_编辑已配置短信
     ${content_info}    查询营销内容    已配置短信
@@ -130,7 +137,8 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     log    pass
 
 删除营销内容_16_短信_删除
-    ${content_info}    查询营销内容    短信
+    [Setup]    创建营销内容    短信
+    ${content_info}    查询营销内容    短信    ${test_content_name}
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
@@ -148,14 +156,18 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     should be equal as integers    ${response.json()['code']}    ${101}
 
 编辑营销内容_18_app_编辑
-    ${content_info}    查询营销内容    app
+    [Setup]    创建营销内容    app
+    ${content_info}    查询营销内容    app    ${test_content_name}
     ${content_name}    catenate    SEPARATOR=_    ${content_info["content_name"]}    update
+    set test variable    ${test_content_name}    ${content_name}
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ...    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销内容    ${test_content_name}
 
 编辑营销内容_19_app_编辑已配置app
     ${content_info}    查询营销内容    已配置app
@@ -175,7 +187,8 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     log    pass
 
 删除营销内容_22_app_删除
-    ${content_info}    查询营销内容    app
+    [Setup]    创建营销内容    app
+    ${content_info}    查询营销内容    app    ${test_content_name}
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
@@ -199,16 +212,57 @@ setup
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
 
 查询营销内容
-    [Arguments]    ${content_type}    # 短信|app|已配置短信|已配置app
-    [Documentation]    ${content_type} \ # 短信|app|已配置短信|已配置app
+    [Arguments]    ${content_type}    ${content_name}=None    # 短信|app|已配置短信|已配置app |营销内容名称
+    [Documentation]    ${content_type} | ${content_name} \ # 短信|app|已配置短信|已配置app |营销内容名称
     connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
     select collection    marketing_content
     ${ref_count}    create dictionary    $gt=${0}
     #构造filter
-    ${filter}    run keyword if    '${content_type}'=='短信'    create dictionary    c_type=message    ref_count=${0}
-    ...    ELSE IF    '${content_type}'=='app'    create dictionary    c_type=app    ref_count=${0}
-    ...    ELSE IF    '${content_type}'=='已配置短信'    create dictionary    c_type=message    ref_count=${ref_count}
-    ...    ELSE IF    '${content_type}'=='已配置app'    create dictionary    c_type=app    ref_count=${ref_count}
+    ${filter}    run keyword if    '${content_type}'=='短信'    create dictionary    c_type=message    ref_count=${0}    name=${content_name}
+    ...    ELSE IF    '${content_type}'=='app'    create dictionary    c_type=app    ref_count=${0}    name=${content_name}
+    ...    ELSE IF    '${content_type}'=='已配置短信'    create dictionary    c_type=message    ref_count=${ref_count}    name=${content_name}
+    ...    ELSE IF    '${content_type}'=='已配置app'    create dictionary    c_type=app    ref_count=${ref_count}    name=${content_name}
+    run keyword if    '${content_name}'=='None'    remove from dictionary    ${filter}    name
     ${results}    find    ${filter}    one_or_multi=one
     ${content_info}    create dictionary    content_id=${results[0]["_id"]}\    content_name=${results[0]["name"]}\
     [Return]    ${content_info}    # 营销内容id和营销内容名称
+
+生成营销内容名称
+    ${content_name}    生成随机字符串    fgk_message_name
+    set test variable    ${test_content_name}    ${content_name}
+    [Return]    ${content_name}    # 返回营销内容名称
+
+删除营销内容
+    [Arguments]    ${content_name}    # 营销内容名称
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_content
+    #拼接filter
+    ${filter}    create dictionary    name=${content_name}    ref_count=${0}
+    ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
+    should be true    ${delete_result[0]}
+
+创建短信内容
+    ${content_name}    生成营销内容名称
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=短信测试内容    m_port=10690290
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Return]    ${content_name}    # 返回创建的营销内容名称
+
+创建app内容
+    ${content_name}    生成随机字符串    fgk_message_name
+    set test variable    ${test_content_name}    ${content_name}
+    #构造json_data
+    ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
+    ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Return]    ${content_name}    # 返回创建的营销内容名称
+
+创建营销内容
+    [Arguments]    ${content_type}    # 营销内容类型：短信|app
+    ${content_name}    run keyword if    '${content_type}'=='短信'    创建短信内容
+    ...    ELSE IF    '${content_type}'=='app'    创建app内容
