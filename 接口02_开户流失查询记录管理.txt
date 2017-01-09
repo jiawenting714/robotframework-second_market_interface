@@ -109,7 +109,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
-    [Teardown]    删除营销对象    ${target_name}
+    [Teardown]    删除营销对象    ${test_target_name}
 
 创建营销对象_10_定时对象_每周_period_date大于6
     #拼接json_data条件
@@ -124,7 +124,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
     #异常检查
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
-    [Teardown]    删除营销对象    ${target_name}
+    [Teardown]    删除营销对象    ${test_target_name}
 
 创建营销对象_11_定时对象_每周_无营销对象名称
     #拼接json_data条件
@@ -164,7 +164,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
-    [Teardown]    删除营销对象    ${target_name}
+    [Teardown]    删除营销对象    ${test_target_name}
 
 创建营销对象_14_定时对象_每月
     #拼接json_data条件
