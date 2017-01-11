@@ -137,47 +137,32 @@ class MyMongodbLibrary(object):
         else:
             raise AssertionError("delete parameter error:must be 'o' or 'one' and 'm' or 'multi'")
 
+    def update(self,filter_,update,one_or_multi="m"):
+        '''
+        if one_or_multi == 'one' or 'o' Delete a single document matching the filter
+        else if one_or_multi = 'm' or 'multi' Delete one or more documents matching the filter
+
+        | update | {"name":"zhangsan"} | {'$inc': {'x': 3}} | one |
+        | update | {"name":"zhangsan"} | {'$inc': {'x': 3}}| multi |
+
+        return tuple (acknowledged,raw_result) like (true,{ok:1,n:0})
+        '''
+        if filter_.has_key("_id") and str(filter_.get("_id")).startswith("ObjectId"):
+            value = eval(filter_.get("_id"))
+            filter_["_id"] = value
+        if str(one_or_multi).lower() == "o" or str(one_or_multi).lower() == "one":
+            print filter_
+            update_one = self._collection.update_one(filter_,update)
+            return update_one
+        elif str(one_or_multi).lower() == "m" or str(one_or_multi).lower() == "multi":
+            update_many = self._collection.update_many(filter_)
+            return update_many
+        else:
+            raise AssertionError("delete parameter error:must be 'o' or 'one' and 'm' or 'multi'")
+
 
 if __name__ == '__main__':
-
-    mongo = MyMongodbLibrary()
-    #mongo.connect_mongodb("10.2.130.194",database="gfwealth")
-    mongo.connect_mongodb("localhost",database="gfwealth")
-    mongo.select_collection("push")
-
-    #result = mongo.find({"shopId":"559205e644721a2c26d11084","deleted":0},{"stats":1,"title":1},'o')
-    #print result
-
-    strs = ObjectId("573a8e75d24d401800cc4a20")
-    result = eval('strs')
-    print result.__repr__()
-    result_del = mongo.delete({"_id":"ObjectId('573a8e75d24d401800cc4a20')"})
-    print result_del
-
-    dt = mongo.create_datetime("2016","07","01")
-    print dt
-    #10.2.130.194
-
-
-    #client = pymongo.MongoClient("10.2.130.194")
-    client = pymongo.MongoClient("localhost")
-    db = client.get_database("gfwealth")
-    collect = db.get_collection("push")
-    cur = collect.find({"shopId":"559205e644721a2c26d11084","deleted":0})
-    print cur.count()
-
-
-    cur2 = collect.find_one({"shopId":"559205e644721a2c26d11084","deleted":0,"createAt":{"$gt":datetime.datetime(2016,06,14)}})
-    print cur2
-
-    cur3 = collect.find({'_id': ObjectId('575fd550170ce01100ce533f'), 'createAt': '{"$gt":}'})
-
-    delete = collect.delete_one({"_id":result})
-    print delete.acknowledged,delete.raw_result
-    delete2 = collect.delete_many({"_id":123})
-    print (delete2.acknowledged,delete2.raw_result)
-
-
+    pass
 
     '''
 

@@ -2,13 +2,15 @@
 Suite Setup       setup
 Library           RequestsLibrary
 Library           String
-Library           MyMongodbLibrary
 Resource          公共资源.txt
+Library           Collections
+Library           MyMongodbLibrary
 
 *** Variables ***
 ${search_activity_url}    /api/remarket/activity/query?offset=0&limit=100
 ${delete_activity_url}    /api/remarket/activity/delete
 ${start_activity_url}    /api/remarket/activity/start
+${create_activity_url}    /api/remarket/activity/save
 
 *** Test Cases ***
 查询营销活动_01_有权限用户登录查询
@@ -17,100 +19,148 @@ ${start_activity_url}    /api/remarket/activity/start
     should be equal as integers    ${response.json()['code']}    ${0}
 
 启动营销活动_02_启动待审核活动
-    ${activity_info}    查询活动信息    待审核
+    [Setup]    创建活动    临时活动
+    ${activity_info}    查询活动信息    待审核    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${101}
+    should be equal as strings    ${response.json()['msg']}    仅允许审核通过、以及启动失败的活动启动! 活动名称: ${activity_name}
+    [Teardown]    删除营销活动    ${activity_name}
 
 启动营销活动_03_启动审核中活动
-    ${activity_info}    查询活动信息    审核中
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核中
+    ${activity_info}    查询活动信息    审核中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${101}
+    should be equal as strings    ${response.json()['msg']}    仅允许审核通过、以及启动失败的活动启动! 活动名称: ${activity_name}
+    [Teardown]    删除营销活动    ${activity_name}
 
 启动营销活动_04_启动活动中活动
-    ${activity_info}    查询活动信息    活动中
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    进行中
+    ${activity_info}    查询活动信息    活动中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${101}
+    should be equal as strings    ${response.json()['msg']}    仅允许审核通过、以及启动失败的活动启动! 活动名称: ${activity_name}
+    [Teardown]    删除营销活动    ${activity_name}
 
 启动营销活动_05_启动审核不通过活动
-    ${activity_info}    查询活动信息    审核不通过
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核不通过
+    ${activity_info}    查询活动信息    审核不通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${101}
+    should be equal as strings    ${response.json()['msg']}    仅允许审核通过、以及启动失败的活动启动! 活动名称: ${activity_name}
+    [Teardown]    删除营销活动    ${activity_name}
 
 启动营销活动_06_启动活动失败活动
-    ${activity_info}    查询活动信息    活动失败
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    启动失败
+    ${activity_info}    查询活动信息    活动失败    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    ${data}    create dictionary    msg=活动启动中，请稍后检查活动状态。
+    dictionaries should be equal    ${response.json()['data']}    ${data}
+    [Teardown]    删除营销活动    ${activity_name}
 
 启动营销活动_07_启动审核完成活动
-    ${activity_info}    查询活动信息    审核通过
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核通过
+    ${activity_info}    查询活动信息    审核通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${0}
-    should be equal as strings    ${response['data']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    ${data}    create dictionary    msg=活动启动中，请稍后检查活动状态。
+    dictionaries should be equal    ${response.json()['data']}    ${data}
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_08_删除待审核活动
-    ${activity_info}    查询活动信息    待审核
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    待审核
+    ${activity_info}    查询活动信息    待审核    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['data']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_09_删除审核中活动
-    ${activity_info}    查询活动信息    审核中
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核中
+    ${activity_info}    查询活动信息    审核中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${102}
+    should be equal as strings    ${response.json()['msg']}    活动状态不允许删除
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_10_删除活动中活动
-    ${activity_info}    查询活动信息    活动中
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    进行中
+    ${activity_info}    查询活动信息    活动中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['data']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_11_删除审核不通过活动
-    ${activity_info}    查询活动信息    审核不通过
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核不通过
+    ${activity_info}    查询活动信息    审核不通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['data']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_12_删除活动失败活动
-    ${activity_info}    查询活动信息    活动失败
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    启动失败
+    ${activity_info}    查询活动信息    活动失败    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['data']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 删除营销活动_13_删除审核完成活动
-    ${activity_info}    查询活动信息    审核通过
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核通过
+    ${activity_info}    查询活动信息    审核通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    ${response.text}
     #检查点
-    should be equal as numbers    ${response['code']}    ${101}
-    should be equal as strings    ${response['msg']}    xxx
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['data']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_14_提交待审核活动
 
@@ -124,6 +174,10 @@ ${start_activity_url}    /api/remarket/activity/start
 
 提交审核营销活动_18_提交审核完成活动
 
+test
+    #创建临时活动
+    创建定时活动
+
 *** Keywords ***
 setup
     &{header}    create dictionary    Content-Type=application/json
@@ -131,18 +185,117 @@ setup
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
 
 查询活动信息
-    [Arguments]    ${activity_type}    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
-    [Documentation]    ${activity_type} # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    [Arguments]    ${activity_type}    ${activity_name}=None    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
+    [Documentation]    ${activity_type} | ${activity_name}=None # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
     connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
     select collection    marketing_activity
     #构造filter
-    ${filter}    run keyword if    '${activity_type}'=='待审核'    create dictionary    status=${1}
-    ...    ELSE IF    '${activity_type}'=='审核中'    create dictionary    status=${6}
-    ...    ELSE IF    '${activity_type}'=='审核不通过'    create dictionary    status=${8}
-    ...    ELSE IF    '${activity_type}'=='审核通过'    create dictionary    status=${7}
-    ...    ELSE IF    '${activity_type}'=='活动中'    create dictionary    status=${2}
-    ...    ELSE IF    '${activity_type}'=='活动失败'    create dictionary    status=${4}
-    ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}
+    ${filter}    run keyword if    '${activity_type}'=='待审核'    create dictionary    status=${1}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='审核中'    create dictionary    status=${6}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='审核不通过'    create dictionary    status=${8}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='审核通过'    create dictionary    status=${7}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='活动中'    create dictionary    status=${2}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='活动失败'    create dictionary    status=${4}    activity_name=${activity_name}
+    ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}    activity_name=${activity_name}
+    run keyword if    '${activity_name}'=='None'    remove from dictionary    ${filter}    activity_name
     ${results}    find    ${filter}    one_or_multi=one
     ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
     [Return]    ${activity_info}    # 活动id和name
+
+创建临时活动
+    ${targetId}    ${sub_id}    获取营销对象id和分包id    临时对象
+    #构造customer_pack和marketing_channel
+    ${customer_pack}    create list
+    ${marketing_channel}    create list
+    ${pack_item}    create dictionary    targetId=${targetId}    subId=${sub_id}
+    insert into list    ${customer_pack}    ${-1}    ${pack_item}
+    ${channel_item}    create dictionary    ch=外呼    content=${EMPTY}
+    insert into list    ${marketing_channel}    ${-1}    ${channel_item}
+    ${marketing_objectives}    create list    开户
+    ${activity_name}    生成活动名称
+    #构造json_data
+    ${json_data}    create dictionary    start_trigger=timing    frequency=once    customer_pack=${customer_pack}    marketing_channel=${marketing_channel}    marketing_objectives=${marketing_objectives}
+    ...    trading_day_only=false    activity_name=${activity_name}
+    log    ${json_data}
+    ${response}    post request    global_session    ${create_activity_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Return]    ${activity_name}    # 返回活动名称
+
+创建定时活动
+    ${targetId}    ${sub_id}    获取营销对象id和分包id    定时对象
+    #构造customer_pack和marketing_channel
+    ${customer_pack}    create list
+    ${marketing_channel}    create list
+    ${pack_item}    create dictionary    targetId=${targetId}    subId=${sub_id}
+    insert into list    ${customer_pack}    ${-1}    ${pack_item}
+    ${channel_item}    create dictionary    ch=外呼    content=${EMPTY}
+    insert into list    ${marketing_channel}    ${-1}    ${channel_item}
+    ${marketing_objectives}    create list    开户
+    ${activity_name}    生成活动名称
+    #构造json_data
+    #endTime暂时设置为固定时间
+    ${json_data}    create dictionary    start_trigger=timing    endTime=2017-01-10 00:00:00    frequency=schedule    customer_pack=${customer_pack}    marketing_channel=${marketing_channel}
+    ...    marketing_objectives=${marketing_objectives}    trading_day_only=false    activity_name=${activity_name}
+    log    ${json_data}
+    ${response}    post request    global_session    ${create_activity_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    succ.
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Return]    ${activity_name}    # 返回活动名称
+
+获取营销对象id和分包id
+    [Arguments]    ${target_type}    # 对象类型：临时对象或定时对象
+    [Documentation]    ${target_type} \ # 对象类型：临时对象或定时对象
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_target
+    #拼接filter
+    ${status}    create dictionary    $ne=${9}
+    ${schedule_task}    run keyword if    '${target_type}'=='临时对象'    set variable    ${false}
+    ...    ELSE IF    '${target_type}'=='定时对象'    set variable    ${true}
+    ${filter}    create dictionary    status=${status}    schedule_task=${schedule_task}
+    ${results}    find    ${filter}    one_or_multi=one
+    #获取target_id和sub_id
+    ${target_id}    set variable    ${results[0]['_id']}
+    ${sub_id}    set variable    ${results[0]['packages'][0]['_id']}
+    ${target_id}    convert to string    ${target_id}
+    ${sub_id}    convert to string    ${sub_id}
+    [Return]    ${target_id}    ${sub_id}
+
+生成活动名称
+    ${activity_name}    生成随机字符串    activity_name
+    [Return]    ${activity_name}    # 返回生成的活动名称
+
+删除营销活动
+    [Arguments]    ${activity_name}    # 营销活动名称
+    #拼接filter
+    ${filter}    create dictionary    activity_name=${activity_name}
+    ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
+    should be true    ${delete_result[0]}
+
+修改营销活动状态
+    [Arguments]    ${activity_name}    ${target_status}    # 营销活动名称|目标状态
+    #状态包括 0 已创建, 1 待审核，2 进行中, 3 启动中, 4 活动失败, 5 定时任务已启动 6、审核中 7、审核通过 8、审核不通过 9、待定时推送
+    ${target_status}    run keyword if    '${target_status}'=='待审核'    set variable    ${1}
+    ...    ELSE IF    '${target_status}'=='进行中'    set variable    ${2}
+    ...    ELSE IF    '${target_status}'=='启动失败'    set variable    ${4}
+    ...    ELSE IF    '${target_status}'=='审核中'    set variable    ${6}
+    ...    ELSE IF    '${target_status}'=='审核通过'    set variable    ${7}
+    ...    ELSE IF    '${target_status}'=='审核不通过'    set variable    ${8}
+    ${filter}    create dictionary    activity_name=${activity_name}
+    #拼接更新的内容
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_activity
+    ${update_field}    create dictionary    status=${target_status}
+    ${update}    create dictionary    $set=${update_field}
+    ${update_results}    update    ${filter}    ${update}    one_or_multi=one
+    log    ${update_results.modified_count }
+    log    ${update_results.raw_result }
+
+创建活动
+    [Arguments]    ${activity_type}    # 活动类型：临时活动or定时活动
+    ${activity_name}    run keyword if    '${activity_type}'=='临时活动'    创建临时活动
+    ...    ELSE IF    '${activity_type}'=='定时活动'    创建定时活动
+    set test variable    ${activity_name}    ${activity_name}
+    [Return]    ${activity_name}    # 返回活动名称
