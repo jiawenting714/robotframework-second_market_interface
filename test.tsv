@@ -1,9 +1,0 @@
-*Test Cases*							
-test	log	1212					
-	${saga}	set variable	wer2				
-							
-testss	log	1212					
-	${saga}	set variable	wer2				
-	#werw						
-	${saga}	set variable	wer2				
-	查询营销对象						

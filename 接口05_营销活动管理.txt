@@ -1,5 +1,6 @@
 *** Settings ***
 Suite Setup       setup
+Test Setup        setup
 Library           RequestsLibrary
 Library           String
 Resource          公共资源.txt
@@ -173,10 +174,6 @@ ${create_activity_url}    /api/remarket/activity/save
 提交审核营销活动_18_提交活动失败活动
 
 提交审核营销活动_18_提交审核完成活动
-
-test
-    #创建临时活动
-    创建定时活动
 
 *** Keywords ***
 setup

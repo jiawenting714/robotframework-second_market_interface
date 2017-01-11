@@ -1,5 +1,6 @@
 *** Settings ***
 Suite Setup       setup
+Test Setup        setup
 Library           RequestsLibrary
 Library           String
 Resource          公共资源.txt
