@@ -12,6 +12,7 @@ ${search_activity_url}    /api/remarket/activity/query?offset=0&limit=100
 ${delete_activity_url}    /api/remarket/activity/delete
 ${start_activity_url}    /api/remarket/activity/start
 ${create_activity_url}    /api/remarket/activity/save
+${confirm_order_url}    /api/audit/order    # 提交审核url
 
 *** Test Cases ***
 查询营销活动_01_有权限用户登录查询
@@ -164,16 +165,68 @@ ${create_activity_url}    /api/remarket/activity/save
     [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_14_提交待审核活动
+    [Setup]    创建活动    临时活动
+    ${activity_info}    查询活动信息    待审核    ${activity_name}
+    #拼接json_data
+    ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
+    ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #检查点
+    should be equal as numbers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['msg']}    ok
+    [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_15_提交审核中活动
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核中
+    ${activity_info}    查询活动信息    审核中    ${activity_name}
+    #拼接json_data
+    ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
+    ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #检查点
+    should be equal as numbers    ${response.json()['code']}    ${16}
+    should be equal as strings    ${response.json()['msg']}    活动不处于待审核状态
+    [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_16_提交活动中活动
-
-提交审核营销活动_17_提交审核不通过活动
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    进行中
+    ${activity_info}    查询活动信息    活动中    ${activity_name}
+    #拼接json_data
+    ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
+    ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #检查点
+    should be equal as numbers    ${response.json()['code']}    ${16}
+    should be equal as strings    ${response.json()['msg']}    活动不处于待审核状态
+    [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_18_提交活动失败活动
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    启动失败
+    ${activity_info}    查询活动信息    活动失败    ${activity_name}
+    #拼接json_data
+    ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
+    ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #检查点
+    should be equal as numbers    ${response.json()['code']}    ${16}
+    should be equal as strings    ${response.json()['msg']}    活动不处于待审核状态
+    [Teardown]    删除营销活动    ${activity_name}
 
 提交审核营销活动_18_提交审核完成活动
+    [Setup]    创建活动    临时活动
+    修改营销活动状态    ${activity_name}    审核通过
+    ${activity_info}    查询活动信息    审核通过    ${activity_name}
+    #拼接json_data
+    ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
+    ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    #检查点
+    should be equal as numbers    ${response.json()['code']}    ${16}
+    should be equal as strings    ${response.json()['msg']}    活动不处于待审核状态
+    [Teardown]    删除营销活动    ${activity_name}
 
 *** Keywords ***
 setup
@@ -196,7 +249,8 @@ setup
     ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}    activity_name=${activity_name}
     run keyword if    '${activity_name}'=='None'    remove from dictionary    ${filter}    activity_name
     ${results}    find    ${filter}    one_or_multi=one
-    ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
+    ${id}    convert to string    ${results[0]['_id']}
+    ${activity_info}    create dictionary    id=${id}    name=${results[0]['activity_name']}
     [Return]    ${activity_info}    # 活动id和name
 
 创建临时活动
