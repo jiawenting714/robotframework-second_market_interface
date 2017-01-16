@@ -9,6 +9,9 @@ Library           MyMongodbLibrary
 *** Variables ***
 ${app_search_url}    /api/remarket/customer_query?filter_name=app-customer&limit=10    # 手机app查询记录管理：查询接口
 ${create_target_url}    /api/remarket/target
+${filter_rule}    %7B%22app_version%22%3A%5B%5D%2C%22view_module%22%3A%5B%5D%2C%22login_times%22%3A%5B%7B%22ge%22%3A1%2C%22le%22%3A100000000%7D%5D%2C%22last_use_time%22%3A%7B%22start%22%3A%222015-01-01%22%2C%22end%22%3A%222016-12-31%22%7D%2C%22customer%22%3A%7B%22province%22%3A%5B%5D%2C%22city%22%3A%5B%5D%7D%2C%22if_phone%22%3A0%2C%22if_wechat%22%3A0%2C%22if_gfportal%22%3A0%7D    # 手机app新建查询条件
+${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 手机app-大数据接口
+${create_customer_query_url}    /api/remarket/customer_query    # 保存新建查询记录url
 
 *** Test Cases ***
 查询手机APP记录_01_无权限用户登录查询
@@ -171,6 +174,7 @@ ${create_target_url}    /api/remarket/target
     should be equal as integers    ${response.json()['code']}    ${12}
 
 删除手机app记录_15_定时对象_删除手机app记录
+    [Setup]    创建手机app记录
     ${customer_info}    查询手机app记录
     #拼接删除记录url
     ${app_delete_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/customer_query/    ${customer_info['customer_query_id']}
@@ -188,10 +192,11 @@ setup
 查询手机app记录
     connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
     select collection    marketing_customer_query
-    ${status}    create dictionary    $ne=9
+    ${status}    create dictionary    $ne=${9}
     ${filter}    create dictionary    status=${status}    filter_name=app-customer
     ${results}    find    ${filter}    one_or_multi=one
     ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    close connection
     [Return]    ${customer_query_info}
 
 生成对象名称
@@ -207,9 +212,28 @@ setup
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}
     ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
     should be true    ${delete_result[0]}
+    close connection
 
 获取手机app查询记录id
     ${customer_info}    查询手机app记录
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     [Return]    ${query_id}    # 返回查询的手机app记录id
+
+新建查询-手机app
+    #拼接json_data
+    ${json_data}    create dictionary    filter_name=app-customer    filter_rule=${filter_rule}
+    ${response}    post request    global_session    ${query_bigdata}    data=${json_data}    headers=&{header}
+    #获取查询结果总数counts
+    ${counts}    set variable    ${response.json()['data']['count']}
+    [Return]    ${counts}
+
+创建手机app记录
+    #拼接json_data
+    ${count}    新建查询-手机app
+    ${json_data}    create dictionary    filter_name=app-customer    filter_rule=${filter_rule}    total=${count}
+    ${response}    post request    global_session    ${create_customer_query_url}    data=${json_data}    headers=&{header}
+    #检查点
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['msg']}    ok

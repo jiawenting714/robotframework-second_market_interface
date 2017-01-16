@@ -15,11 +15,11 @@
 import pymongo
 from bson.objectid import ObjectId
 import datetime
-
+from time import sleep
 
 __version__ = '0.1'
 class MyMongodbLibrary(object):
-    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_SCOPE = 'TEST CASE'
     ROBOT_LIBRARY_VERSION = '0.1'
 
     def __init__(self):
@@ -65,7 +65,7 @@ class MyMongodbLibrary(object):
         try:
             if port is not None:
                 port = int(port)
-            self._connect = pymongo.MongoClient(host,port)
+            self._connect = pymongo.MongoClient(host,port,maxPoolSize=200,socketKeepAlive=True)
             self._db = self._connect.get_database(database)
         except:
             raise AssertionError("connect mongodb error,please "
@@ -100,11 +100,19 @@ class MyMongodbLibrary(object):
         result = []
 
         if str(one_or_multi).lower() == "o" or str(one_or_multi).lower() == "one":
-            cursor_one = self._collection.find_one(filter_,**kwargs)
+            try:
+                cursor_one = self._collection.find_one(filter_,**kwargs)
+            except:
+                sleep(2)
+                cursor_one = self._collection.find_one(filter_,**kwargs)
             result.append(cursor_one)
             return result
         elif str(one_or_multi).lower() == "m" or str(one_or_multi).lower() == "multi":
-            cursor = self._collection.find(filter_,**kwargs)
+            try:
+                cursor = self._collection.find(filter_,**kwargs)
+            except:
+                sleep(2)
+                cursor = self._collection.find(filter_,**kwargs)
             for c in cursor:
                 result.append(c)
             return result
@@ -129,10 +137,18 @@ class MyMongodbLibrary(object):
 
         if str(one_or_multi).lower() == "o" or str(one_or_multi).lower() == "one":
             print filter_
-            delete_one = self._collection.delete_one(filter_)
+            try:
+                delete_one = self._collection.delete_one(filter_)
+            except:
+                sleep(2)
+                delete_one = self._collection.delete_one(filter_)
             return (delete_one.acknowledged,delete_one.raw_result)
         elif str(one_or_multi).lower() == "m" or str(one_or_multi).lower() == "multi":
-            delete_multi = self._collection.delete_many(filter_)
+            try:
+                delete_multi = self._collection.delete_many(filter_)
+            except:
+                sleep(2)
+                delete_multi = self._collection.delete_many(filter_)
             return (delete_multi.acknowledged,delete_multi.raw_result)
         else:
             raise AssertionError("delete parameter error:must be 'o' or 'one' and 'm' or 'multi'")
@@ -152,17 +168,34 @@ class MyMongodbLibrary(object):
             filter_["_id"] = value
         if str(one_or_multi).lower() == "o" or str(one_or_multi).lower() == "one":
             print filter_
-            update_one = self._collection.update_one(filter_,update)
+            try:
+                update_one = self._collection.update_one(filter_,update)
+            except:
+                sleep(2)
+                update_one = self._collection.update_one(filter_,update)
             return update_one
         elif str(one_or_multi).lower() == "m" or str(one_or_multi).lower() == "multi":
-            update_many = self._collection.update_many(filter_)
+            try:
+                update_many = self._collection.update_many(filter_,update)
+            except:
+                sleep(2)
+                update_many = self._collection.update_many(filter_,update)
             return update_many
         else:
             raise AssertionError("delete parameter error:must be 'o' or 'one' and 'm' or 'multi'")
 
+    def close_connection(self):
+        """Disconnect from MongoDB"""
+        if self._connect:
+            self._connect.close()
 
 if __name__ == '__main__':
-    pass
+    mongo = MyMongodbLibrary()
+    mongo.connect_mongodb("10.2.124.15",27017,'gfactivity')
+    mongo.select_collection("marketing_activity")
+    result = mongo.update({'activity_name':'activity_name_3941'},{'$set': {'status':7}},"one")
+    print result.modified_count
+    print result.raw_result
 
     '''
 

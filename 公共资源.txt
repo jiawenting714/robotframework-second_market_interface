@@ -47,6 +47,7 @@ create_global_session
     ${filter}    create dictionary    status=${status}    filter_name=open-account-loss
     ${results}    find    ${filter}    one_or_multi=one
     ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    close connection
     [Return]    ${customer_query_info}    # 返回查询后的customer_query_info
 
 查询营销对象
@@ -72,6 +73,7 @@ create_global_session
     ${query_results}    find    ${filter}    one_or_multi=one
     ${target_customer_count}    set variable    ${query_results[0]['customer_count']}
     ${target_info}    create dictionary    id=${target_id}    customer_count=${target_customer_count}
+    close connection
     [Return]    ${target_info}    # 返回营销对象id和customer_count
 
 查询手机app记录
@@ -81,6 +83,7 @@ create_global_session
     ${filter}    create dictionary    status=${status}    filter_name=app-customer
     ${results}    find    ${filter}    one_or_multi=one
     ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    close connection
     [Return]    ${customer_query_info}
 
 查询营销内容
@@ -96,6 +99,7 @@ create_global_session
     ...    ELSE IF    '${content_type}'=='已配置app'    create dictionary    c_type=app    ref_count=${ref_count}
     ${results}    find    ${filter}    one_or_multi=one
     ${content_info}    create dictionary    content_id=${results[0]["_id"]}\    content_name=${results[0]["name"]}\
+    close connection
     [Return]    ${content_info}    # 营销内容id和营销内容名称
 
 查询活动信息
@@ -113,4 +117,5 @@ create_global_session
     ...    ELSE IF    '${activity_type}'=='活动结束'    create dictionary    status=${9}
     ${results}    find    ${filter}    one_or_multi=one
     ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
+    close connection
     [Return]    ${activity_info}    # 活动id和name

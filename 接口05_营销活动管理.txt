@@ -251,6 +251,7 @@ setup
     ${results}    find    ${filter}    one_or_multi=one
     ${id}    convert to string    ${results[0]['_id']}
     ${activity_info}    create dictionary    id=${id}    name=${results[0]['activity_name']}
+    close connection
     [Return]    ${activity_info}    # 活动id和name
 
 创建临时活动
@@ -312,6 +313,7 @@ setup
     ${sub_id}    set variable    ${results[0]['packages'][0]['_id']}
     ${target_id}    convert to string    ${target_id}
     ${sub_id}    convert to string    ${sub_id}
+    close connection
     [Return]    ${target_id}    ${sub_id}
 
 生成活动名称
@@ -320,10 +322,13 @@ setup
 
 删除营销活动
     [Arguments]    ${activity_name}    # 营销活动名称
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    select collection    marketing_activity
     #拼接filter
     ${filter}    create dictionary    activity_name=${activity_name}
     ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
     should be true    ${delete_result[0]}
+    close connection
 
 修改营销活动状态
     [Arguments]    ${activity_name}    ${target_status}    # 营销活动名称|目标状态
@@ -343,6 +348,7 @@ setup
     ${update_results}    update    ${filter}    ${update}    one_or_multi=one
     log    ${update_results.modified_count }
     log    ${update_results.raw_result }
+    close connection
 
 创建活动
     [Arguments]    ${activity_type}    # 活动类型：临时活动or定时活动

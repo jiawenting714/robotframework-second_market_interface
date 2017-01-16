@@ -226,6 +226,7 @@ setup
     run keyword if    '${content_name}'=='None'    remove from dictionary    ${filter}    name
     ${results}    find    ${filter}    one_or_multi=one
     ${content_info}    create dictionary    content_id=${results[0]["_id"]}\    content_name=${results[0]["name"]}\
+    close connection
     [Return]    ${content_info}    # 营销内容id和营销内容名称
 
 生成营销内容名称
@@ -241,6 +242,7 @@ setup
     ${filter}    create dictionary    name=${content_name}    ref_count=${0}
     ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
     should be true    ${delete_result[0]}
+    close connection
 
 创建短信内容
     ${content_name}    生成营销内容名称

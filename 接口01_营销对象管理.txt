@@ -3,9 +3,9 @@ Suite Setup       setup
 Test Setup        setup
 Library           RequestsLibrary
 Resource          公共资源.txt
-Library           MyMongodbLibrary
 Library           Collections
 Library           String
+Library           MyMongodbLibrary
 
 *** Variables ***
 ${target_search_url}    /api/remarket/target?offset=0&limit=100
@@ -299,6 +299,7 @@ ${create_target_url}    /api/remarket/target
     ${query_results}    find    ${filter}    one_or_multi=one
     ${target_customer_count}    set variable    ${query_results[0]['customer_count']}
     ${target_info}    create dictionary    id=${target_id}    customer_count=${target_customer_count}
+    close connection
     [Return]    ${target_info}    # 返回营销对象id和customer_count
 
 setup
@@ -352,6 +353,7 @@ setup
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}
     ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
     should be true    ${delete_result[0]}
+    close connection
 
 创建已分包临时对象
     ${target_name}    创建临时对象

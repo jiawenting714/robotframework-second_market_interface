@@ -11,6 +11,9 @@ Library           DateTime
 *** Variables ***
 ${openloss_search_url}    /api/remarket/customer_query?filter_name=open-account-loss&limit=10    # 开户流失查询记录管理：查询接口
 ${create_target_url}    /api/remarket/target    # 创建营销对象接口
+${create_customer_query_url}    /api/remarket/customer_query    # 保存查询记录url
+${filter_rule}    %7B%22open_account_apply_time%22%3A%7B%22start%22%3A%222015-01-01%22%2C%22end%22%3A%222016-01-01%22%7D%2C%22loss_types%22%3A%5B%5D%2C%22open_account_stopping_step%22%3A%5B%5D%2C%22open_account_channel%22%3A%5B%5D%2C%22open_account_source_scategory%22%3A%5B%5D%2C%22open_account_source_tcategory%22%3A%5B%5D%2C%22if_recommendno%22%3A0%2C%22customer%22%3A%7B%22province%22%3A%5B%5D%2C%22city%22%3A%5B%5D%7D%2C%22if_phone%22%3A0%2C%22if_wechat%22%3A0%2C%22if_gfportal%22%3A0%7D    # 搜索条件：2015-1-1到2016-1-1
+${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大数据接口
 
 *** Test Cases ***
 查询开户流失记录_01_无权限用户登录查询
@@ -182,6 +185,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
     [Teardown]    删除营销对象    ${target_name}
 
 删除开户流失记录_15_删除记录
+    [Setup]    创建开户流失记录
     ${customer_info}    查询开户流失记录
     #拼接删除记录url
     ${openloss_delete_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/customer_query/    ${customer_info['customer_query_id']}
@@ -198,6 +202,7 @@ ${create_target_url}    /api/remarket/target    # 创建营销对象接口
     ${filter}    create dictionary    status=${status}    filter_name=open-account-loss
     ${results}    find    ${filter}    one_or_multi=one
     ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    close connection
     [Return]    ${customer_query_info}    # 返回查询后的customer_query_info
 
 setup
@@ -213,6 +218,7 @@ setup
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}
     ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
     should be true    ${delete_result[0]}
+    close connection
 
 生成对象名称
     ${target_name}    生成随机字符串    target_name
@@ -224,3 +230,21 @@ setup
     ${query_id}    set variable    ${customer_info['customer_query_id']}
     ${query_id}    convert to string    ${query_id}
     [Return]    ${query_id}    # 返回开户流失记录id
+
+创建开户流失记录
+    #拼接json_data
+    ${count}    新建查询-开户流失
+    ${json_data}    create dictionary    filter_name=open-account-loss    filter_rule=${filter_rule}    total=${count}
+    ${response}    post request    global_session    ${create_customer_query_url}    data=${json_data}    headers=&{header}
+    #检查点
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['msg']}    ok
+
+新建查询-开户流失
+    #拼接json_data
+    ${json_data}    create dictionary    filter_name=open-account-loss    filter_rule=${filter_rule}
+    ${response}    post request    global_session    ${query_bigdata}    data=${json_data}    headers=&{header}
+    #获取查询结果总数counts
+    ${counts}    set variable    ${response.json()['data']['count']}
+    [Return]    ${counts}    # 返回新建查询结果记录数
