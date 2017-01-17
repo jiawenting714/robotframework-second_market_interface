@@ -263,7 +263,8 @@ ${create_target_url}    /api/remarket/target
     #拼接分包结果字符串    {"type":1,"name_partition":[{"name":"target_name_1462_数据包1","size":5},{"name":"target_name_1462_数据包2","size":"5"}]}
     ${name_strategy}    create list
     : FOR    ${item}    IN    @{package_list}
-    \    ${pack_name}    catenate    SEPARATOR=_    ${target_name}    ${item}
+    \    ${rand_str}    生成随机字符串    length=2
+    \    ${pack_name}    catenate    SEPARATOR=${EMPTY}    ${target_name}    ${rand_str}
     \    ${package_dict}    create dictionary    name=${pack_name}    size=${item}
     \    insert into list    ${name_strategy}    ${-1}    ${package_dict}
     ${package_strategy}    run keyword if    '${package_type}'=='随机分包'    create dictionary    type=${1}    name_partition=${name_strategy}

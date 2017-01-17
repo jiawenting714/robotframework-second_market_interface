@@ -29,8 +29,8 @@ create_global_session
     [Return]    ${session}
 
 生成随机字符串
-    [Arguments]    ${prefix}=None
-    ${random_string}    generate random string    4    [NUMBERS]
+    [Arguments]    ${prefix}=${EMPTY}    ${length}=4
+    ${random_string}    generate random string    ${length}    [NUMBERS]
     ${totle_random_string}    catenate    SEPARATOR=_    ${prefix}    ${random_string}
     [Return]    ${totle_random_string}    # 返回随机字符串
 
