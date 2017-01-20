@@ -196,7 +196,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
 
 *** Keywords ***
 查询开户流失记录
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_customer_query
     ${status}    create dictionary    $ne=9
     ${filter}    create dictionary    status=${status}    filter_name=open-account-loss
@@ -212,7 +212,7 @@ setup
 
 删除营销对象
     [Arguments]    ${target_name}    # 营销对象名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_target
     ${status}    create dictionary    $ne=${9}
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}

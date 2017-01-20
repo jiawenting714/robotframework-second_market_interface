@@ -274,7 +274,7 @@ ${create_target_url}    /api/remarket/target
 查询营销对象
     [Arguments]    ${target_type}    ${target_name}=None    #target_type: 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象 target_name:营销对象名称
     [Documentation]    ${target_type} # 定时对象|临时对象|已分包临时对象|已分包定时对象|已配置临时对象|已分包定时对象
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_target
     ${frequency}    create dictionary    $ne=once
     ${ref_count}    create dictionary    $gt=${0}
@@ -348,7 +348,7 @@ setup
 
 删除营销对象
     [Arguments]    ${target_name}    # 营销对象名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_target
     ${status}    create dictionary    $ne=${9}
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}

@@ -237,7 +237,7 @@ setup
 查询活动信息
     [Arguments]    ${activity_type}    ${activity_name}=None    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
     [Documentation]    ${activity_type} | ${activity_name}=None # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_activity
     #构造filter
     ${filter}    run keyword if    '${activity_type}'=='待审核'    create dictionary    status=${1}    activity_name=${activity_name}
@@ -300,7 +300,7 @@ setup
 获取营销对象id和分包id
     [Arguments]    ${target_type}    # 对象类型：临时对象或定时对象
     [Documentation]    ${target_type} \ # 对象类型：临时对象或定时对象
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_target
     #拼接filter
     ${status}    create dictionary    $ne=${9}
@@ -322,7 +322,7 @@ setup
 
 删除营销活动
     [Arguments]    ${activity_name}    # 营销活动名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_activity
     #拼接filter
     ${filter}    create dictionary    activity_name=${activity_name}
@@ -341,7 +341,7 @@ setup
     ...    ELSE IF    '${target_status}'=='审核不通过'    set variable    ${8}
     ${filter}    create dictionary    activity_name=${activity_name}
     #拼接更新的内容
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_activity
     ${update_field}    create dictionary    status=${target_status}
     ${update}    create dictionary    $set=${update_field}

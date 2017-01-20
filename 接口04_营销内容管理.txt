@@ -215,7 +215,7 @@ setup
 查询营销内容
     [Arguments]    ${content_type}    ${content_name}=None    # 短信|app|已配置短信|已配置app |营销内容名称
     [Documentation]    ${content_type} | ${content_name} \ # 短信|app|已配置短信|已配置app |营销内容名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_content
     ${ref_count}    create dictionary    $gt=${0}
     #构造filter
@@ -236,7 +236,7 @@ setup
 
 删除营销内容
     [Arguments]    ${content_name}    # 营销内容名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_content
     #拼接filter
     ${filter}    create dictionary    name=${content_name}    ref_count=${0}

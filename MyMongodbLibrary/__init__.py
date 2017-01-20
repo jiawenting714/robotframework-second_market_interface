@@ -61,11 +61,27 @@ class MyMongodbLibrary(object):
         | connect mongodb | localhost |
         | connect mongodb | localhost | 27017 | test |
         '''
+        #mongodb://gfactivity:gfactivity@10.2.124.15:27017/gfactivity
+        #hostUrl:mongodb://[username:password@]hostIp:port/database
+
+        host_url = "mongodb://"
+        if username:
+            host_url = host_url+username+":"
+        if password:
+            host_url = host_url+password+"@"
+        if host:
+            host_url = host_url+host+":"
+        if port:
+            host_url = host_url+str(port)+"/"
+        else:
+            host_url = host_url+"27017"+"/"
+        if database:
+            host_url = host_url+database
 
         try:
             if port is not None:
                 port = int(port)
-            self._connect = pymongo.MongoClient(host,port,maxPoolSize=200,socketKeepAlive=True)
+            self._connect = pymongo.MongoClient(host_url,port,maxPoolSize=200,socketKeepAlive=True)
             self._db = self._connect.get_database(database)
         except:
             raise AssertionError("connect mongodb error,please "
@@ -191,12 +207,11 @@ class MyMongodbLibrary(object):
 
 if __name__ == '__main__':
     mongo = MyMongodbLibrary()
-    mongo.connect_mongodb("10.2.124.15",27017,'gfactivity')
+    # mongo.connect_mongodb("mongodb://gfactivity:gfactivity@10.2.124.15",27017,'gfactivity')
+    mongo.connect_mongodb("10.2.124.15",27017,'gfactivity','gfactivity','gfactivity')
     mongo.select_collection("marketing_activity")
-    result = mongo.update({'activity_name':'activity_name_3941'},{'$set': {'status':7}},"one")
-    print result.modified_count
-    print result.raw_result
-
+    results = mongo.find({"activity_name":"www"})
+    print results
     '''
 
     import paramiko
@@ -208,42 +223,3 @@ if __name__ == '__main__':
         print o
     #554efd6d3bf8fc1e00b4376f
     '''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -190,7 +190,7 @@ setup
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
 
 查询手机app记录
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_customer_query
     ${status}    create dictionary    $ne=${9}
     ${filter}    create dictionary    status=${status}    filter_name=app-customer
@@ -206,7 +206,7 @@ setup
 
 删除营销对象
     [Arguments]    ${target_name}    # 营销对象名称
-    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
     select collection    marketing_target
     ${status}    create dictionary    $ne=${9}
     ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}
