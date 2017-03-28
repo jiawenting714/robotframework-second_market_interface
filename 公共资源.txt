@@ -10,6 +10,7 @@ ${timeout}        10    # 连接超时时间
 &{user_info}      username=admin    password=gfadmin    # 有二次营销权限的用户信息
 ${login_interface}    /keystone/api/session/signin    # 营销平台登录验证接口
 &{mongodb_info}    host=10.2.124.15    port=27017    database=gfactivity    username=gfactivity    password=gfactivity    # 测试环境mongodb信息
+&{nopermission_userinfo}    username=super    password=gfadmin
 
 *** Keywords ***
 create_global_session
@@ -24,6 +25,9 @@ create_global_session
     &{header}    create dictionary    Content-Type=application/json
     &{user_info}    create dictionary    username=${username}    password=${password}
     ${response}    post request    global_session    ${login_url}    data=&{user_info}    headers=&{header}
+    #通过http状态码检查被测环境是否正常运行
+    run keyword if    ${response.status_code}==${401}    fatal error    权限认证失败，请找开发确认
+    ...    ELSE IF    ${response.status_code}>=${500}    fatal error    服务器出错或服务已停掉，请确认...
     log    ${response.text}
     should be true    ${response.json()['success']}
     [Return]    ${session}
@@ -119,3 +123,13 @@ create_global_session
     ${activity_info}    create dictionary    id=${results[0]['_id']}    name=${results[0]['activity_name']}
     close connection
     [Return]    ${activity_info}    # 活动id和name
+
+检查被测环境是否正常
+    [Arguments]    ${global_session_alias}
+    [Documentation]    通过营销对象查询接口检测被测环境是否正常
+    ${target_search_url}    set variable    /api/remarket/target?offset=0&limit=100
+    &{header}    create dictionary    Content-Type=application/json
+    ${response}    get request    ${global_session_alias}    ${target_search_url}    headers=&{header}
+    #如果状态码为401或502，则整个测试失败
+    run keyword if    ${response.status_code}==${401}    fatal error    权限认证失败，请找开发确认
+    ...    ELSE IF    ${response.status_code}>=${500}    fatal error    服务器出错或服务已停掉，请确认...

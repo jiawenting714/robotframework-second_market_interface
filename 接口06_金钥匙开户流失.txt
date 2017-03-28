@@ -1,0 +1,154 @@
+*** Settings ***
+Suite Setup       setup
+Test Setup        setup
+Resource          公共资源.txt
+Library           RequestsLibrary
+Library           json
+
+*** Variables ***
+${filter_rule}    {"push_time_start":"2017-03-01 00:00:00","push_time_end":"2017-03-26 00:00:00","loss_types":[],"open_account_stopping_step":[],"open_account_channel":[],"open_account_source_scategory":[],"open_account_source_tcategory":[],"is_h5_op":0,"has_return_visit":0,"customer":{"province":[],"city":[]},"if_recommendno":0}    # 查询条件
+${goldenkey_bigdata_search_url}    /api/remarket/bigdata/query_aggregate
+${save_goldenkey_search_data}    /api/remarket/customer_query
+${openloss_search_url}    /api/remarket/customer_query?filter_name=goldenkey-loss
+${create_target_url}    /api/remarket/target
+
+*** Test Cases ***
+01_查询开户流失记录_无权限用户查询
+    &{user_info}    create dictionary    username=${nopermission_userinfo['username']}    password=${nopermission_userinfo['password']}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+    #目前增加无权限用户可查看数据
+    #should be equal as strings    ${response.json()['msg']}    您没有权限访问
+
+02_查询开户流失记录_未登录用户查询
+    create global session    global_session    ${base_url}
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${17}
+    should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
+
+03_查询开户流失记录_有权限用户查询
+    ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+04_创建营销对象_临时对象
+    #拼接json_data条件
+    ${query_id}    获取金钥匙开户流失查询记录id
+    ${target_name}    生成对象名称
+    ${json_data}    create dictionary    name=${target_name}    frequency=once    queryId=${query_id}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销对象    ${test_target_name}
+
+05_创建营销对象_定时对象_每日
+    #拼接json_data条件
+    ${query_id}    获取金钥匙开户流失查询记录id
+    ${target_name}    生成对象名称
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
+    ${json_data}    create dictionary    name=${target_name}    frequency=daily    queryId=${query_id}    period_time=09:00    endTime=${endtime}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销对象    ${test_target_name}
+
+06_创建营销对象_定时对象_每周
+    #拼接json_data条件
+    ${query_id}    获取金钥匙开户流失查询记录id
+    ${target_name}    生成对象名称
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
+    #每周二
+    ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
+    ...    endTime=${endtime}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销对象    ${test_target_name}
+
+07_创建营销对象_定时对象_每月
+    #拼接json_data条件
+    ${query_id}    获取金钥匙开户流失查询记录id
+    ${target_name}    生成对象名称
+    ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
+    #每月9号
+    ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=9
+    ...    endTime=${endtime}
+    ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+    [Teardown]    删除营销对象    ${test_target_name}
+
+08_删除金钥匙开户流失记录
+    [Setup]    保存金钥匙开户流失记录
+    ${customer_info}    查询金钥匙开户流失记录
+    #拼接删除记录url
+    ${openloss_delete_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/customer_query/    ${customer_info['customer_query_id']}
+    ${response}    delete request    global_session    ${openloss_delete_url}
+    log    ${response.text}
+    should be equal as strings    ${response.json()['data']}    ok
+    should be equal as integers    ${response.json()['code']}    ${0}
+
+*** Keywords ***
+新建查询_查询金钥匙开户流失记录
+    #拼接json_data
+    ${filter_rule}    loads    ${filter_rule}
+    ${json_data}    create dictionary    filter_name=goldenkey-loss    filter_rule=${filter_rule}
+    ${response}    post request    global_session    ${goldenkey_bigdata_search_url}    data=${json_data}    headers=&{header}
+    #获取查询结果总数counts
+    log    ${response.json()}
+    ${counts}    set variable    ${response.json()['data']['count']}
+    [Return]    ${counts}
+
+setup
+    &{header}    create dictionary    Content-Type=application/json
+    set suite variable    &{header}    &{header}
+    ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+
+保存金钥匙开户流失记录
+    #拼接json_data
+    ${filter_rule}    loads    ${filter_rule}
+    ${count}    新建查询_查询金钥匙开户流失记录
+    ${json_data}    create dictionary    filter_name=goldenkey-loss    filter_rule=${filter_rule}    total=${count}
+    ${response}    post request    global_session    ${save_goldenkey_search_data}    data=${json_data}    headers=&{header}
+    #检查点
+    log    ${response.text}
+    should be equal as integers    ${response.json()['code']}    ${0}
+    should be equal as strings    ${response.json()['msg']}    ok
+
+生成对象名称
+    ${target_name}    生成随机字符串    target_name
+    set test variable    ${test_target_name}    ${target_name}
+    [Return]    ${target_name}
+
+获取金钥匙开户流失查询记录id
+    ${customer_info}    查询开户流失记录
+    ${query_id}    set variable    ${customer_info['customer_query_id']}
+    ${query_id}    convert to string    ${query_id}
+    [Return]    ${query_id}
+
+查询金钥匙开户流失记录
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
+    select collection    marketing_customer_query
+    ${status}    create dictionary    $ne=9
+    ${filter}    create dictionary    status=${status}    filter_name=goldenkey-loss
+    ${results}    find    ${filter}    one_or_multi=one
+    ${customer_query_info}    create dictionary    customer_query_id=${results[0]['_id']}    customer_count=${results[0]['customer_count']}
+    close connection
+    [Return]    ${customer_query_info}
+
+删除营销对象
+    [Arguments]    ${target_name}
+    connect mongodb    ${mongodb_info['host']}    ${mongodb_info['port']}    ${mongodb_info['database']}    ${mongodb_info['username']}    ${mongodb_info['password']}
+    select collection    marketing_target
+    ${status}    create dictionary    $ne=${9}
+    ${filter}    create dictionary    name=${target_name}    ref_count=${0}    status=${status}
+    ${delete_result}    MyMongodbLibrary.delete    ${filter}    multi
+    should be true    ${delete_result[0]}
+    close connection

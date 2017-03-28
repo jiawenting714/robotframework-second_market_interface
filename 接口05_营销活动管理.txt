@@ -1,4 +1,8 @@
 *** Settings ***
+Documentation     documentation
+...               documentation
+...               documentation
+...               *HTML*<b>documentation</b>
 Suite Setup       setup
 Test Setup        setup
 Library           RequestsLibrary
@@ -356,3 +360,13 @@ setup
     ...    ELSE IF    '${activity_type}'=='定时活动'    创建定时活动
     set test variable    ${activity_name}    ${activity_name}
     [Return]    ${activity_name}    # 返回活动名称
+
+tmplate_keyword
+    [Arguments]    ${name}    ${age}
+    log    ${name}
+    log    ${age}
+    should be equal as integers    ${age}    24
+
+The result of ${calculation} should be ${expected}
+    should be true    ${calculation}
+    should be true    ${expected}

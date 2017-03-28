@@ -15,12 +15,13 @@ ${create_customer_query_url}    /api/remarket/customer_query    # 保存新建�
 
 *** Test Cases ***
 查询手机APP记录_01_无权限用户登录查询
-    ${user_info}    create dictionary    username=super    password=gfadmin
+    &{user_info}    create dictionary    username=${nopermission_userinfo['username']}    password=${nopermission_userinfo['password']}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${app_search_url}    headers=&{header}
     log    ${response.text}
-    should be equal as integers    ${response.json()['code']}    ${18}
-    should be equal as strings    ${response.json()['msg']}    您没有权限访问
+    should be equal as integers    ${response.json()['code']}    ${0}
+    #目前增加无权限用户可查看数据
+    #should be equal as strings    ${response.json()['msg']}    您没有权限访问
 
 查询手机APP记录_02_用户未登录查询
     create global session    global_session    ${base_url}
@@ -225,6 +226,7 @@ setup
     ${json_data}    create dictionary    filter_name=app-customer    filter_rule=${filter_rule}
     ${response}    post request    global_session    ${query_bigdata}    data=${json_data}    headers=&{header}
     #获取查询结果总数counts
+    log    ${response.json()}
     ${counts}    set variable    ${response.json()['data']['count']}
     [Return]    ${counts}
 

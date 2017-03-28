@@ -14,12 +14,13 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
 
 *** Test Cases ***
 查询营销内容_01_无权限用户登录查询
-    ${user_info}    create dictionary    username=super    password=gfadmin
+    &{user_info}    create dictionary    username=${nopermission_userinfo['username']}    password=${nopermission_userinfo['password']}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${content_search_url}    headers=&{header}
     log    ${response.text}
-    should be equal as integers    ${response.json()['code']}    ${18}
-    should be equal as strings    ${response.json()['msg']}    您没有权限访问
+    should be equal as integers    ${response.json()['code']}    ${0}
+    #目前增加无权限用户可查看数据
+    #should be equal as strings    ${response.json()['msg']}    您没有权限访问
 
 查询营销内容_02_用户未登录查询
     create global session    global_session    ${base_url}
