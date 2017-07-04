@@ -17,6 +17,7 @@ ${create_target_url}    /api/remarket/target
     &{header}    create dictionary    Content-Type=application/json
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${target_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
     #目前增加无权限用户可查看数据
@@ -26,6 +27,7 @@ ${create_target_url}    /api/remarket/target
     create_global_session    global_session    ${base_url}
     &{header}    create dictionary    Content-Type=application/json
     ${response}    get request    global_session    ${target_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${17}
     should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
@@ -34,6 +36,7 @@ ${create_target_url}    /api/remarket/target
     #&{header}    create dictionary    Content-Type=application/json
     #${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${target_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
 
@@ -46,6 +49,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
     should be equal as strings    ${response.json()['data']}    ok
@@ -60,6 +64,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
     should be equal as integers    ${response.json()['code']}    ${13}
@@ -74,6 +79,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    分包数量与总客户数不匹配
     should be equal as integers    ${response.json()['code']}    ${13}
@@ -88,6 +94,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -102,6 +109,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    partition比例分包综合需为100。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -116,6 +124,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    partition比例分包综合需为100。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -130,6 +139,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    此数据已分包
     should be equal as integers    ${response.json()['code']}    ${13}
@@ -143,6 +153,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许重新分包。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -156,6 +167,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    此数据已分包
     should be equal as integers    ${response.json()['code']}    ${13}
@@ -169,6 +181,7 @@ ${create_target_url}    /api/remarket/target
     #拼接分包url
     ${target_pack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    put request    global_session    ${target_pack_url}    data=${pack_strategy}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许重新分包。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -179,6 +192,7 @@ ${create_target_url}    /api/remarket/target
     #拼接取消分包url
     ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -190,6 +204,7 @@ ${create_target_url}    /api/remarket/target
     #拼接取消分包url
     ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -201,6 +216,7 @@ ${create_target_url}    /api/remarket/target
     #拼接取消分包url
     ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    对象未分包
     should be equal as integers    ${response.json()['code']}    ${15}
@@ -212,6 +228,7 @@ ${create_target_url}    /api/remarket/target
     #拼接取消分包url
     ${target_unpack_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/pack/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_unpack_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    对象未分包
     should be equal as integers    ${response.json()['code']}    ${15}
@@ -223,6 +240,7 @@ ${create_target_url}    /api/remarket/target
     #拼接删除营销对象url
     ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -233,6 +251,7 @@ ${create_target_url}    /api/remarket/target
     #拼接删除营销对象url
     ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -242,6 +261,7 @@ ${create_target_url}    /api/remarket/target
     #拼接删除营销对象url
     ${target_delet_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/target/    ${target_info['id']}
     ${response}    delete request    global_session    ${target_delet_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
     should be equal as integers    ${response.json()['code']}    ${101}

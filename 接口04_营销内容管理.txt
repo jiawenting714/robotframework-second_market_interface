@@ -17,6 +17,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     &{user_info}    create dictionary    username=${nopermission_userinfo['username']}    password=${nopermission_userinfo['password']}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
     #目前增加无权限用户可查看数据
@@ -25,12 +26,14 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
 查询营销内容_02_用户未登录查询
     create global session    global_session    ${base_url}
     ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${17}
     should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
 
 查询营销内容_03_有权限用户登录查询
     ${response}    get request    global_session    ${content_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
 
@@ -39,6 +42,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=短信测试内容    m_port=10690290
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -49,6 +53,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${EMPTY}    c_type=message    msg=短信测试内容    m_port=10690290
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "name" fails because ["name" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -58,6 +63,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=${EMPTY}    m_port=10690290
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "msg" fails because ["msg" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -68,6 +74,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -78,6 +85,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${EMPTY}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "name" fails because ["name" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -87,6 +95,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=${EMPTY}    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "app_title" fails because ["app_title" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -96,6 +105,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=${EMPTY}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "app_url" fails because ["app_url" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -105,6 +115,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=${EMPTY}    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    error: ValidationError: child "msg" fails because ["msg" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -117,6 +128,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=测试短信内容    m_port=10690290    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -128,15 +140,10 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    name=${content_name}    c_type=message    msg=测试短信内容    m_port=10690290    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许修改。
     should be equal as integers    ${response.json()['code']}    ${101}
-
-复制营销内容_14_短信_复制
-    log    pass
-
-复制营销内容_15_短信_复制已配置短信
-    log    pass
 
 删除营销内容_16_短信_删除
     [Setup]    创建营销内容    短信
@@ -144,6 +151,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -153,6 +161,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -166,6 +175,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ...    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    succ.
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -178,15 +188,10 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     ${json_data}    create dictionary    name=${content_name}    c_type=app    msg=APP测试内容    app_title=fengguangke_app_title    app_url=https://www.baidu.com
     ...    id=${content_info['content_id']}
     ${response}    post request    global_session    ${create_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许修改。
     should be equal as integers    ${response.json()['code']}    ${101}
-
-复制营销内容_20_app_复制
-    log    pass
-
-复制营销内容_21_app_复制已配置app
-    log    pass
 
 删除营销内容_22_app_删除
     [Setup]    创建营销内容    app
@@ -194,6 +199,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -203,6 +209,7 @@ ${delete_content_url}    /api/remarket/marketing_content/delete
     #构造json_data
     ${json_data}    create dictionary    id=${content_info["content_id"]}
     ${response}    post request    global_session    ${delete_content_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    已被分配到活动,不允许删除。
     should be equal as integers    ${response.json()['code']}    ${101}
@@ -212,6 +219,7 @@ setup
     &{header}    create dictionary    Content-Type=application/json
     set suite variable    &{header}    &{header}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    检查被测环境是否正常    global_session
 
 查询营销内容
     [Arguments]    ${content_type}    ${content_name}=None    # 短信|app|已配置短信|已配置app |营销内容名称

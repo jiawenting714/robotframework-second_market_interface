@@ -21,6 +21,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
 *** Test Cases ***
 查询营销活动_01_有权限用户登录查询
     ${response}    get request    global_session    ${search_activity_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
 
@@ -29,6 +30,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    待审核    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${101}
@@ -41,6 +43,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${101}
     should be equal as strings    ${response.json()['msg']}    仅允许审核通过、以及启动失败的活动启动! 活动名称: ${activity_name}
@@ -52,6 +55,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    活动中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${101}
@@ -64,6 +68,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核不通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${101}
@@ -76,6 +81,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    活动失败    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -89,6 +95,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${start_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -102,6 +109,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    待审核    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -114,6 +122,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${102}
@@ -126,6 +135,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    活动中    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -138,6 +148,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核不通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -150,6 +161,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    活动失败    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -162,6 +174,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     ${activity_info}    查询活动信息    审核通过    ${activity_name}
     ${params}    create dictionary    id=${activity_info['id']}
     ${response}    get request    global_session    ${delete_activity_url}    params=${params}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -174,6 +187,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     #拼接json_data
     ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
     ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${0}
@@ -187,6 +201,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     #拼接json_data
     ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
     ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${16}
@@ -200,6 +215,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     #拼接json_data
     ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
     ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${16}
@@ -213,6 +229,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     #拼接json_data
     ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
     ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${16}
@@ -226,6 +243,7 @@ ${confirm_order_url}    /api/audit/order    # 提交审核url
     #拼接json_data
     ${json_data}    create dictionary    name=${activity_info['name']}    type=${2}    activity_id=${activity_info['id']}
     ${response}    post request    global_session    ${confirm_order_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #检查点
     should be equal as numbers    ${response.json()['code']}    ${16}
@@ -237,6 +255,7 @@ setup
     &{header}    create dictionary    Content-Type=application/json
     set suite variable    &{header}    &{header}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    检查被测环境是否正常    global_session
 
 查询活动信息
     [Arguments]    ${activity_type}    ${activity_name}=None    # 待审核|审核中|审核不通过|审核通过|活动中|活动结束|活动失败

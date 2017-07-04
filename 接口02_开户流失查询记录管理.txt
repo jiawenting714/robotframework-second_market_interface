@@ -20,6 +20,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     &{user_info}    create dictionary    username=${nopermission_userinfo['username']}    password=${nopermission_userinfo['password']}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
     ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
     #目前增加无权限用户可查看数据
@@ -28,12 +29,14 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
 查询开户流失记录_02_用户未登录查询
     create global session    global_session    ${base_url}
     ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${17}
     should be equal as strings    ${response.json()['msg']}    认证失败:Error: 未登录
 
 查询开户流失记录_03_有权限用户登录查询
     ${response}    get request    global_session    ${openloss_search_url}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as integers    ${response.json()['code']}    ${0}
 
@@ -43,6 +46,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${target_name}    生成对象名称
     ${json_data}    create dictionary    name=${target_name}    frequency=once    queryId=${query_id}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -54,6 +58,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${target_name}    生成对象名称
     ${json_data}    create dictionary    frequency=once    queryId=${query_id}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is required]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -64,6 +69,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${target_name}    生成对象名称
     ${json_data}    create dictionary    name=${EMPTY}    frequency=once    queryId=${query_id}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is required]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -75,6 +81,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     ${json_data}    create dictionary    frequency=${EMPTY}    name=${target_name}    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "frequency" fails because ["frequency" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -86,6 +93,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     ${json_data}    create dictionary    frequency=${EMPTY}    name=${EMPTY}    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -97,6 +105,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${endtime}    get current date    increment=${3600*24*2}    result_format=%Y-%m-%d %H:%M:%S
     ${json_data}    create dictionary    name=${target_name}    frequency=daily    queryId=${query_id}    period_time=09:00    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -111,6 +120,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -125,6 +135,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${target_name}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=8
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     #异常检查
     should be equal as strings    ${response.json()['data']}    ok
@@ -140,6 +151,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${EMPTY}    frequency=weekly    queryId=${query_id}    period_time=09:00    period_date=2
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -153,6 +165,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${EMPTY}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=2
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['msg']}    ValidationError: child "name" fails because ["name" is not allowed to be empty]
     should be equal as integers    ${response.json()['code']}    ${12}
@@ -166,6 +179,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=33
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -180,6 +194,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     ${json_data}    create dictionary    name=${target_name}    frequency=monthly    queryId=${query_id}    period_time=09:00    period_date=9
     ...    endTime=${endtime}
     ${response}    post request    global_session    ${create_target_url}    data=${json_data}    headers=&{header}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -191,6 +206,7 @@ ${query_bigdata}    /api/remarket/bigdata/query_aggregate    # 开户流失-大�
     #拼接删除记录url
     ${openloss_delete_url}    catenate    SEPARATOR=${EMPTY}    /api/remarket/customer_query/    ${customer_info['customer_query_id']}
     ${response}    delete request    global_session    ${openloss_delete_url}
+    log    请求响应时间: ${response.elapsed.total_seconds()}s
     log    ${response.text}
     should be equal as strings    ${response.json()['data']}    ok
     should be equal as integers    ${response.json()['code']}    ${0}
@@ -210,6 +226,7 @@ setup
     &{header}    create dictionary    Content-Type=application/json
     set suite variable    &{header}    &{header}
     ${session}    登录    ${login_interface}    ${user_info['username']}    ${user_info['password']}
+    检查被测环境是否正常    global_session
 
 删除营销对象
     [Arguments]    ${target_name}    # 营销对象名称
